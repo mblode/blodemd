@@ -1,0 +1,12 @@
+export const Video = ({ src }: { src: string }) => {
+  return (
+    <div className="video-embed">
+      <iframe
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        src={src}
+        title="Video"
+      />
+    </div>
+  );
+};

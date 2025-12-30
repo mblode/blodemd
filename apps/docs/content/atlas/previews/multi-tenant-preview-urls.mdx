@@ -1,0 +1,75 @@
+---
+title: Multi-tenant preview URLs
+---
+
+Multi-tenant preview URLs let you test tenant-specific experiences in preview deployments without adding new domains.
+
+<Callout type="info">
+This feature requires a custom preview deployment suffix. It does not work with the default `.vercel.app` suffix.
+</Callout>
+
+## The problem
+
+Standard preview URLs work for single-tenant apps, but multi-tenant platforms need previews per tenant. Without tenant-aware previews you would need to:
+
+- Switch tenant context manually
+- Create separate preview environments
+- Attach temporary domains for each tenant
+
+## The solution
+
+Use a prefix before `---` in the preview URL:
+
+```
+{prefix}---{preview-url}
+```
+
+Vercel routes the request to `{preview-url}` and your code receives the full hostname including the prefix.
+
+**Examples**
+
+| URL                                      | Routes to                       | Host header received                          |
+| ---------------------------------------- | ------------------------------- | --------------------------------------------- |
+| `acme---preview-xyz.vercel.dev`          | `preview-xyz.vercel.dev`        | `acme---preview-xyz.vercel.dev`               |
+| `globex---my-app-git-feature.vercel.dev` | `my-app-git-feature.vercel.dev` | `globex---my-app-git-feature.vercel.dev`      |
+| `tenant-123---my-app-abc123.vercel.dev`  | `my-app-abc123.vercel.dev`      | `tenant-123---my-app-abc123.vercel.dev`       |
+
+## How it works
+
+1. User visits `{tenant}---{preview-url}`
+2. Vercel routes the request to the deployment
+3. Middleware receives the full hostname
+4. Your code extracts the prefix and routes to the tenant
+
+## Reference implementation
+
+```ts title="middleware.ts"
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { getSubdomain } from "tldts";
+
+export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get("host") || request.nextUrl.hostname;
+  const subdomain = getSubdomain(hostname) || "";
+  const [tenantPart] = subdomain.includes("---") ? subdomain.split("---") : [];
+
+  if (!tenantPart) {
+    return NextResponse.next();
+  }
+
+  const url = request.nextUrl.clone();
+  const pathname = url.pathname;
+  url.pathname = `/${tenantPart}${pathname}`;
+  return NextResponse.rewrite(url);
+}
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+```
+
+## Limitations
+
+- Works only with custom preview URL suffixes
+- Prefix must appear before `---`
+- Total hostname length must remain under DNS limits
