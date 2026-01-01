@@ -1,0 +1,65 @@
+import type { MemberRole, MemberStatus } from "@prisma/client";
+import { prisma } from "../index";
+import type { WorkspaceMemberRecord } from "../types/records";
+import { workspaceMemberSelect } from "../types/selects";
+
+export type WorkspaceMemberCreateInput = {
+  workspaceId: string;
+  email: string;
+  role?: MemberRole;
+  status?: MemberStatus;
+  joinedAt?: Date | null;
+};
+
+export type WorkspaceMemberUpdateInput = {
+  role?: MemberRole;
+  status?: MemberStatus;
+  joinedAt?: Date | null;
+};
+
+export class WorkspaceMemberDao {
+  async listByWorkspace(workspaceId: string): Promise<WorkspaceMemberRecord[]> {
+    return prisma.workspaceMember.findMany({
+      where: { workspaceId },
+      select: workspaceMemberSelect,
+      orderBy: { joinedAt: "desc" },
+    });
+  }
+
+  async getByWorkspaceEmail(
+    workspaceId: string,
+    email: string
+  ): Promise<WorkspaceMemberRecord | null> {
+    return prisma.workspaceMember.findFirst({
+      where: { workspaceId, email },
+      select: workspaceMemberSelect,
+    });
+  }
+
+  async create(
+    input: WorkspaceMemberCreateInput
+  ): Promise<WorkspaceMemberRecord> {
+    return prisma.workspaceMember.create({
+      data: input,
+      select: workspaceMemberSelect,
+    });
+  }
+
+  async update(
+    id: string,
+    input: WorkspaceMemberUpdateInput
+  ): Promise<WorkspaceMemberRecord> {
+    return prisma.workspaceMember.update({
+      where: { id },
+      data: input,
+      select: workspaceMemberSelect,
+    });
+  }
+
+  async delete(id: string): Promise<WorkspaceMemberRecord> {
+    return prisma.workspaceMember.delete({
+      where: { id },
+      select: workspaceMemberSelect,
+    });
+  }
+}

@@ -17,7 +17,7 @@ import { getTenantBySlug } from "@/lib/tenants";
 import { extractToc } from "@/lib/toc";
 
 const getDocData = cache(async (tenantSlug: string, slugKey: string) => {
-  const tenant = getTenantBySlug(tenantSlug);
+  const tenant = await getTenantBySlug(tenantSlug);
   if (!tenant) {
     return null;
   }
@@ -107,32 +107,40 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const slugKey = (params.slug ?? []).join("/");
   const data = await getDocData(params.tenant, slugKey);
-  if (!data || (data as { configErrors?: string[] }).configErrors) {
+  if (!data || "configErrors" in data) {
     return {
       title: "Docs",
       description: "Documentation",
     };
   }
 
-  const { config, pageTitle, pageDescription, tenant } = data as Awaited<
-    ReturnType<typeof getDocData>
-  >;
+  const { config, pageTitle, pageDescription, tenant } = data;
 
   const baseTitle = config?.metadata?.defaultTitle ?? config?.name ?? "Docs";
   const titleTemplate = config?.metadata?.titleTemplate ?? "%s · Docs";
   const title = pageTitle ? titleTemplate.replace("%s", pageTitle) : baseTitle;
 
-  const headerStore = headers();
+  const headerStore = await headers();
   const basePathHeader = headerStore.get("x-tenant-base-path") ?? "";
+  const strategy = headerStore.get("x-tenant-strategy");
+  const requestedHost = headerStore.get("x-tenant-domain");
   const basePath = basePathHeader || tenant.pathPrefix || "";
+  const canonicalBasePath = strategy === "path" ? "" : basePath;
   const canonicalPath = slugKey ? `/${slugKey}` : "/";
-  const fullCanonical = `${basePath}${canonicalPath}`.replace(/\/+/g, "/");
+  const fullCanonical = `${canonicalBasePath}${canonicalPath}`.replace(
+    /\/+/g,
+    "/"
+  );
+  const canonicalHost =
+    strategy === "custom-domain" && requestedHost
+      ? requestedHost
+      : tenant.primaryDomain;
 
   return {
     title,
     description: pageDescription ?? config?.description,
     alternates: {
-      canonical: `https://${tenant.primaryDomain}${fullCanonical}`,
+      canonical: `https://${canonicalHost}${fullCanonical}`,
     },
   };
 }
@@ -143,7 +151,7 @@ export default async function DocPage({
   params: { tenant: string; slug?: string[] };
 }) {
   const slugKey = (params.slug ?? []).join("/");
-  const headerStore = headers();
+  const headerStore = await headers();
   const headerTenant = headerStore.get("x-tenant-slug");
   const basePathHeader = headerStore.get("x-tenant-base-path") ?? "";
   if (headerTenant && headerTenant !== params.tenant) {
@@ -155,11 +163,12 @@ export default async function DocPage({
   }
 
   if ("configErrors" in data) {
+    const errors = data.configErrors ?? [];
     return (
       <div className="doc-error">
         <h1>Invalid docs.json</h1>
         <ul>
-          {data.configErrors.map((error) => (
+          {errors.map((error) => (
             <li key={error}>{error}</li>
           ))}
         </ul>

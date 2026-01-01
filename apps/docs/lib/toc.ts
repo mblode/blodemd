@@ -16,8 +16,12 @@ export const extractToc = (source: string): TocItem[] => {
     if (!match) {
       continue;
     }
-    const level = match[1].length;
-    const title = match[2].trim();
+    const [, hashes = "", heading = ""] = match;
+    if (!(hashes && heading)) {
+      continue;
+    }
+    const level = hashes.length;
+    const title = heading.trim();
     const id = slugify(title);
     toc.push({ id, title, level });
   }

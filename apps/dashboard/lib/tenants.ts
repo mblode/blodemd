@@ -7,7 +7,7 @@ export type TenantOverview = Tenant & {
   previews: { name: string; status: "Ready" | "Building"; url: string }[];
 };
 
-const baseDomain = "docsplatform.com";
+const baseDomain = "neue.com";
 
 export const tenantData: TenantOverview[] = [
   {

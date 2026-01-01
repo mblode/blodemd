@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, JetBrains_Mono, Sora } from "next/font/google";
 import "./globals.css";
-import { DashboardShell } from "@/components/dashboard-shell";
 
 const bodyFont = Sora({
   subsets: ["latin"],
@@ -20,8 +19,8 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Atlas Dashboard",
-  description: "Manage tenants, domains, and deployments",
+  title: "neue dashboard",
+  description: "Manage your docs projects and deployments",
 };
 
 export default function RootLayout({
@@ -34,7 +33,7 @@ export default function RootLayout({
       <body
         className={`${bodyFont.variable} ${headingFont.variable} ${monoFont.variable}`}
       >
-        <DashboardShell>{children}</DashboardShell>
+        {children}
       </body>
     </html>
   );

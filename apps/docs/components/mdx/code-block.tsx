@@ -10,15 +10,15 @@ const getCodeString = (node: ReactNode): string => {
   if (Array.isArray(node)) {
     return node.map(getCodeString).join("");
   }
-  if (isValidElement(node)) {
+  if (isValidElement<{ children?: ReactNode }>(node)) {
     return getCodeString(node.props.children);
   }
   return "";
 };
 
 const getLanguage = (node: ReactNode): string | undefined => {
-  if (isValidElement(node)) {
-    const className = node.props?.className as string | undefined;
+  if (isValidElement<{ className?: string; children?: ReactNode }>(node)) {
+    const className = node.props.className;
     const match = /language-([\w-]+)/.exec(className ?? "");
     return match?.[1];
   }

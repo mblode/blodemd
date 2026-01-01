@@ -7,11 +7,9 @@
     "docs-cli": "./bin.js"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0"
+    "lint": "ultracite check"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@types/node": "^22.15.3",
-    "eslint": "^9.39.1"
+    "@types/node": "^22.15.3"
   }
 }

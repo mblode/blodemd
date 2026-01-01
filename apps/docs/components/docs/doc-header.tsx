@@ -41,6 +41,8 @@ export const DocHeader = ({
   const globalLinks = config.navigation.global?.links ?? [];
   const versions = config.navigation.versions ?? [];
   const languages = config.navigation.languages ?? [];
+  const [primaryVersion] = versions;
+  const [primaryLanguage] = languages;
 
   return (
     <header className="doc-header">
@@ -86,11 +88,11 @@ export const DocHeader = ({
         {config.features?.search !== false ? (
           <Search basePath={basePath} items={searchItems} />
         ) : null}
-        {versions.length ? (
-          <Dropdown items={versions} label={versions[0].label} />
+        {primaryVersion ? (
+          <Dropdown items={versions} label={primaryVersion.label} />
         ) : null}
-        {languages.length ? (
-          <Dropdown items={languages} label={languages[0].label} />
+        {primaryLanguage ? (
+          <Dropdown items={languages} label={primaryLanguage.label} />
         ) : null}
         {config.features?.themeToggle !== false ? <ThemeToggle /> : null}
       </div>

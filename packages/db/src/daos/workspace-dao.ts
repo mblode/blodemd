@@ -1,0 +1,60 @@
+import { prisma } from "../index";
+import type { WorkspaceRecord } from "../types/records";
+import { workspaceSelect } from "../types/selects";
+
+export interface WorkspaceCreateInput {
+  slug: string;
+  name: string;
+}
+
+export interface WorkspaceUpdateInput {
+  name?: string;
+}
+
+export class WorkspaceDao {
+  async list(): Promise<WorkspaceRecord[]> {
+    return prisma.workspace.findMany({
+      select: workspaceSelect,
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async getById(id: string): Promise<WorkspaceRecord | null> {
+    return prisma.workspace.findUnique({
+      where: { id },
+      select: workspaceSelect,
+    });
+  }
+
+  async getBySlug(slug: string): Promise<WorkspaceRecord | null> {
+    return prisma.workspace.findUnique({
+      where: { slug },
+      select: workspaceSelect,
+    });
+  }
+
+  async create(input: WorkspaceCreateInput): Promise<WorkspaceRecord> {
+    return prisma.workspace.create({
+      data: input,
+      select: workspaceSelect,
+    });
+  }
+
+  async update(
+    id: string,
+    input: WorkspaceUpdateInput
+  ): Promise<WorkspaceRecord> {
+    return prisma.workspace.update({
+      where: { id },
+      data: input,
+      select: workspaceSelect,
+    });
+  }
+
+  async delete(id: string): Promise<WorkspaceRecord> {
+    return prisma.workspace.delete({
+      where: { id },
+      select: workspaceSelect,
+    });
+  }
+}

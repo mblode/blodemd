@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 
 export const StatusPill = ({
   status,
@@ -8,11 +8,17 @@ export const StatusPill = ({
     | "Pending Verification"
     | "Invalid Configuration";
 }) => {
-  const classes = clsx("status-pill", {
-    "status-pill--success": status === "Valid Configuration",
-    "status-pill--warning": status === "Pending Verification",
-    "status-pill--danger": status === "Invalid Configuration",
-  });
-
-  return <span className={classes}>{status}</span>;
+  return (
+    <span
+      className={cn(
+        "rounded-full px-3 py-1 font-semibold text-xs uppercase tracking-[0.2em]",
+        status === "Valid Configuration" &&
+          "bg-emerald-500/15 text-emerald-300",
+        status === "Pending Verification" && "bg-amber-500/15 text-amber-200",
+        status === "Invalid Configuration" && "bg-rose-500/15 text-rose-200"
+      )}
+    >
+      {status}
+    </span>
+  );
 };

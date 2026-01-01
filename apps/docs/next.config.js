@@ -15,6 +15,7 @@ const nextConfig = {
   },
   transpilePackages: [
     "@repo/common",
+    "@repo/contracts",
     "@repo/models",
     "@repo/prebuild",
     "@repo/previewing",

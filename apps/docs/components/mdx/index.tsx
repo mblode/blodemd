@@ -1,3 +1,4 @@
+import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import { Callout } from "./callout";
 import { CodeBlock } from "./code-block";
@@ -23,7 +24,7 @@ const MdxLink = ({
   return <Link href={href} {...props} />;
 };
 
-export const mdxComponents = {
+export const mdxComponents: MDXComponents = {
   Callout,
   Tabs,
   Tab,

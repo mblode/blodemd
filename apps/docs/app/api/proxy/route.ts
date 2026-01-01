@@ -15,7 +15,8 @@ export async function POST(request: Request) {
   }
 
   const tenantSlug = request.headers.get("x-tenant-slug") ?? "";
-  const tenant = getTenantBySlug(tenantSlug) ?? getDefaultTenant();
+  const tenant =
+    (await getTenantBySlug(tenantSlug)) ?? (await getDefaultTenant());
 
   if (!tenant) {
     return NextResponse.json({ error: "Unknown tenant" }, { status: 400 });

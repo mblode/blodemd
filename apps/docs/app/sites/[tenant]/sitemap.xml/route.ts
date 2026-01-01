@@ -1,16 +1,17 @@
 import { loadDocsConfig } from "@repo/previewing";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { buildNavigation, flattenNav } from "@/lib/navigation";
 import { buildOpenApiRegistry } from "@/lib/openapi";
 import { toDocHref } from "@/lib/routes";
 import { getTenantBySlug } from "@/lib/tenants";
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { tenant: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ tenant: string }> }
 ) {
-  const tenant = getTenantBySlug(params.tenant);
+  const { tenant: tenantSlug } = await params;
+  const tenant = await getTenantBySlug(tenantSlug);
   if (!tenant) {
     return new NextResponse("Not found", { status: 404 });
   }
@@ -27,17 +28,22 @@ export async function GET(
   const nav = buildNavigation(configResult.config, registry);
   const pages = flattenNav(nav);
 
-  const headerStore = headers();
+  const headerStore = await headers();
   const host = headerStore.get("host") ?? "";
+  const strategy = headerStore.get("x-tenant-strategy");
+  const requestedHost = headerStore.get("x-tenant-domain");
   const protocol = headerStore.get("x-forwarded-proto") ?? "https";
-  const origin = `${protocol}://${host}`;
+  const canonicalHost =
+    strategy === "custom-domain" && requestedHost
+      ? requestedHost
+      : tenant.primaryDomain;
+  const origin = `${protocol}://${canonicalHost || host}`;
+  const basePathHeader =
+    headerStore.get("x-tenant-base-path") ?? tenant.pathPrefix ?? "";
+  const basePath = strategy === "path" ? "" : basePathHeader;
 
   const urls = Array.from(
-    new Set(
-      pages.map(
-        (page) => `${origin}${toDocHref(page.path, tenant.pathPrefix ?? "")}`
-      )
-    )
+    new Set(pages.map((page) => `${origin}${toDocHref(page.path, basePath)}`))
   );
   const xml =
     `<?xml version="1.0" encoding="UTF-8"?>\n` +

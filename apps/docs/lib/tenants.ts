@@ -1,54 +1,94 @@
 import path from "node:path";
+import { TenantSchema } from "@repo/contracts";
 import type { Tenant } from "@repo/models";
+import { cache } from "react";
 
-const rootDomain = process.env.PLATFORM_ROOT_DOMAIN ?? "docsplatform.com";
+const rootDomain = process.env.PLATFORM_ROOT_DOMAIN ?? "neue.com";
+const apiBase =
+  process.env.DOCS_API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  "http://localhost:4000";
 
 const tenantDocsPath = (slug: string) =>
   path.join(process.cwd(), "content", slug);
 
-export const tenants: Tenant[] = [
-  {
-    id: "tenant_atlas",
-    slug: "atlas",
-    name: "Atlas",
-    description: "Mintlify-style docs platform",
-    primaryDomain: `atlas.${rootDomain}`,
-    subdomain: "atlas",
-    customDomains: ["docs.atlas.example"],
-    docsPath: tenantDocsPath("atlas"),
-    status: "active",
-  },
-  {
-    id: "tenant_orbit",
-    slug: "orbit",
-    name: "Orbit",
-    description: "Preview tenant for subpath demos",
-    primaryDomain: `orbit.${rootDomain}`,
-    subdomain: "orbit",
-    customDomains: ["docs.orbit.example"],
-    pathPrefix: "/docs",
-    docsPath: tenantDocsPath("atlas"),
-    status: "active",
-  },
-];
+const mapTenant = (tenant: {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  primaryDomain: string;
+  subdomain: string;
+  customDomains: string[];
+  pathPrefix?: string;
+  status: "active" | "disabled";
+}): Tenant => ({
+  ...tenant,
+  docsPath: tenantDocsPath(tenant.slug),
+});
 
-export const getTenantBySlug = (slug: string) =>
-  tenants.find((tenant) => tenant.slug === slug) ?? null;
+const fetchTenant = async (slug: string): Promise<Tenant | null> => {
+  const url = new URL(`/tenants/${slug}`, apiBase);
+  const response = await fetch(url.toString(), { next: { revalidate: 30 } });
+  if (!response.ok) {
+    return null;
+  }
+  const json = (await response.json()) as unknown;
+  const parsed = TenantSchema.safeParse(json);
+  if (!parsed.success) {
+    return null;
+  }
+  return mapTenant(parsed.data);
+};
 
-export const getTenantBySubdomain = (subdomain: string) =>
-  tenants.find((tenant) => tenant.subdomain === subdomain) ?? null;
+const fetchTenants = async (): Promise<Tenant[]> => {
+  const url = new URL("/tenants", apiBase);
+  const response = await fetch(url.toString(), { next: { revalidate: 30 } });
+  if (!response.ok) {
+    return [];
+  }
+  const json = (await response.json()) as unknown;
+  const parsed = TenantSchema.array().safeParse(json);
+  if (!parsed.success) {
+    return [];
+  }
+  return parsed.data.map(mapTenant);
+};
 
-export const getTenantByCustomDomain = (domain: string) =>
-  tenants.find((tenant) => tenant.customDomains.includes(domain)) ?? null;
+export const listTenants = cache(fetchTenants);
 
-export const getTenantByDomain = (domain: string) =>
-  tenants.find((tenant) => tenant.primaryDomain === domain) ??
-  getTenantByCustomDomain(domain);
+export const getTenantBySlug = cache(fetchTenant);
 
-export const getTenantByPathPrefix = (prefix: string) =>
-  tenants.find((tenant) => tenant.pathPrefix === prefix) ?? null;
+export const getTenantBySubdomain = async (subdomain: string) => {
+  const tenants = await listTenants();
+  return tenants.find((tenant) => tenant.subdomain === subdomain) ?? null;
+};
 
-export const getDefaultTenant = () => tenants[0] ?? null;
+export const getTenantByCustomDomain = async (domain: string) => {
+  const tenants = await listTenants();
+  return (
+    tenants.find((tenant) => tenant.customDomains.includes(domain)) ?? null
+  );
+};
+
+export const getTenantByDomain = async (domain: string) => {
+  const tenants = await listTenants();
+  return (
+    tenants.find((tenant) => tenant.primaryDomain === domain) ??
+    tenants.find((tenant) => tenant.customDomains.includes(domain)) ??
+    null
+  );
+};
+
+export const getTenantByPathPrefix = async (prefix: string) => {
+  const tenants = await listTenants();
+  return tenants.find((tenant) => tenant.pathPrefix === prefix) ?? null;
+};
+
+export const getDefaultTenant = async () => {
+  const tenants = await listTenants();
+  return tenants[0] ?? null;
+};
 
 export const platformConfig = {
   rootDomain,

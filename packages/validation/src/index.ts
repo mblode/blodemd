@@ -4,11 +4,11 @@ export type ValidationResult =
   | { success: true; data: DocsConfig }
   | { success: false; errors: string[] };
 
-const formatIssues = (
-  issues: Array<{ path: Array<string | number>; message: string }>
-) => {
+const formatIssues = (issues: { path: PropertyKey[]; message: string }[]) => {
   return issues.map((issue) => {
-    const path = issue.path.length ? issue.path.join(".") : "root";
+    const path = issue.path.length
+      ? issue.path.map((part) => String(part)).join(".")
+      : "root";
     return `${path}: ${issue.message}`;
   });
 };
