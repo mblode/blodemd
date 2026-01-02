@@ -1,5 +1,5 @@
 import { TenantResolutionSchema } from "@repo/contracts";
-import { platformConfig } from "./tenants";
+import { platformConfig } from "./platform-config";
 
 const DEFAULT_RESERVED_PATHS = [
   "/api",

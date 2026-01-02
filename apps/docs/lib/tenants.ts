@@ -3,7 +3,6 @@ import { TenantSchema } from "@repo/contracts";
 import type { Tenant } from "@repo/models";
 import { cache } from "react";
 
-const rootDomain = process.env.PLATFORM_ROOT_DOMAIN ?? "neue.com";
 const apiBase =
   process.env.DOCS_API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -90,7 +89,4 @@ export const getDefaultTenant = async () => {
   return tenants[0] ?? null;
 };
 
-export const platformConfig = {
-  rootDomain,
-  assetPrefix: process.env.PLATFORM_ASSET_PREFIX ?? "",
-};
+export { platformConfig } from "./platform-config";
