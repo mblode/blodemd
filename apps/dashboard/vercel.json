@@ -1,7 +1,6 @@
 {
-	"buildCommand": "cd ../.. && npx turbo run build --filter=dashboard",
-	"devCommand": "cd ../.. && npm run dev --filter=dashboard",
-	"installCommand": "cd ../.. && npm install",
+	"buildCommand": "npx turbo run build --filter=dashboard...",
+	"installCommand": "npm install --prefix=../.. --include-workspace-root",
 	"framework": "nextjs",
 	"outputDirectory": ".next"
 }

@@ -1,6 +1,6 @@
 {
-	"buildCommand": "cd ../.. && npx turbo run build --filter=api",
-	"installCommand": "cd ../.. && npm install",
+	"buildCommand": "npx turbo run build --filter=api...",
+	"installCommand": "npm install --prefix=../.. --include-workspace-root",
 	"outputDirectory": "dist",
 	"functions": {
 		"api/dist/index.js": {
