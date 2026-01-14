@@ -4,8 +4,15 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    ".": {
+      "react-server": "./src/next-server.ts",
+      "default": "./src/browser.ts"
+    },
+    "./server": "./src/next-server.ts",
+    "./browser": "./src/browser.ts",
+    "./service": "./src/service.ts",
+    "./database": "./src/database.ts",
+    "./env": "./src/env.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

@@ -1,5 +1,5 @@
 import { bootstrapUser, listWorkspaces } from "@repo/api-client";
-import { createNextServerSupabaseClient } from "@repo/supabase";
+import { createNextServerSupabaseClient } from "@repo/supabase/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 

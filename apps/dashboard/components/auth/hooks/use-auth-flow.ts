@@ -1,7 +1,7 @@
 "use client";
 
 import { bootstrapUser } from "@repo/api-client";
-import { createBrowserSupabaseClient } from "@repo/supabase";
+import { createBrowserSupabaseClient } from "@repo/supabase/browser";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";

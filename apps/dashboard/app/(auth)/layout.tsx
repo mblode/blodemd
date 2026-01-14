@@ -1,4 +1,4 @@
-import { createNextServerSupabaseClient } from "@repo/supabase";
+import { createNextServerSupabaseClient } from "@repo/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function AuthLayout({

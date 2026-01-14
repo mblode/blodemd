@@ -1,7 +1,7 @@
 "use client";
 
 import type { Workspace } from "@repo/contracts";
-import { createBrowserSupabaseClient } from "@repo/supabase";
+import { createBrowserSupabaseClient } from "@repo/supabase/browser";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
