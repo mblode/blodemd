@@ -1,4 +1,4 @@
 {
-	"buildCommand": "cd ../.. && npx turbo run build --filter=api...",
-	"outputDirectory": "apps/api/dist"
+  "buildCommand": "cd ../.. && npx turbo run build --filter=api...",
+  "outputDirectory": "apps/api/dist"
 }
