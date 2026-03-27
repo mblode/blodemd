@@ -4,6 +4,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strictNullChecks": true
   },
   "include": ["src/**/*.ts"]

@@ -15,11 +15,11 @@ import {
 } from "@repo/validation";
 import YAML from "yaml";
 
-import type { ContentSource } from "./content-source.js";
+import type { ContentSource } from "./content-source";
 
-export { BlobContentSource, createBlobSource } from "./blob-source.js";
-export { createFsSource, FsContentSource } from "./fs-source.js";
-export type { ContentSource } from "./content-source.js";
+export { BlobContentSource, createBlobSource } from "./blob-source";
+export { createFsSource, FsContentSource } from "./fs-source";
+export type { ContentSource } from "./content-source";
 
 export type SiteConfigResult =
   | { ok: true; config: SiteConfig; warnings: string[] }

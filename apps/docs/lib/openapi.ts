@@ -34,7 +34,7 @@ const toSourceObject = (
   return value;
 };
 
-export const collectOpenApiSources = (collection?: CollectionConfig) => {
+const collectOpenApiSources = (collection?: CollectionConfig) => {
   const sources: DocsOpenApiSource[] = [];
 
   for (const item of ensureArray(collection?.openapi)) {

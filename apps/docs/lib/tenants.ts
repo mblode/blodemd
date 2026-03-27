@@ -62,37 +62,9 @@ const fetchTenants = async (): Promise<Tenant[]> => {
   return parsed.data.map(mapTenant);
 };
 
-export const listTenants = fetchTenants;
-
 export const getTenantBySlug = fetchTenant;
 
-export const getTenantBySubdomain = async (subdomain: string) => {
-  const tenants = await listTenants();
-  return tenants.find((tenant) => tenant.subdomain === subdomain) ?? null;
-};
-
-export const getTenantByCustomDomain = async (domain: string) => {
-  const tenants = await listTenants();
-  return (
-    tenants.find((tenant) => tenant.customDomains.includes(domain)) ?? null
-  );
-};
-
-export const getTenantByDomain = async (domain: string) => {
-  const tenants = await listTenants();
-  return (
-    tenants.find((tenant) => tenant.primaryDomain === domain) ??
-    tenants.find((tenant) => tenant.customDomains.includes(domain)) ??
-    null
-  );
-};
-
-export const getTenantByPathPrefix = async (prefix: string) => {
-  const tenants = await listTenants();
-  return tenants.find((tenant) => tenant.pathPrefix === prefix) ?? null;
-};
-
 export const getDefaultTenant = async () => {
-  const tenants = await listTenants();
+  const tenants = await fetchTenants();
   return tenants[0] ?? null;
 };

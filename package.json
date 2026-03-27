@@ -21,14 +21,12 @@
     "test:component": "vitest run --config vitest.component.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:smoke": "vitest run --config vitest.smoke.config.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "knip": "DATABASE_URL=postgresql://localhost/dummy npx knip"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
-    "drizzle-kit": "^1.0.0-beta.19",
-    "drizzle-orm": "^1.0.0-beta.19",
     "jsdom": "^26.1.0",
     "lefthook": "^2.1.4",
     "turbo": "^2.7.2",

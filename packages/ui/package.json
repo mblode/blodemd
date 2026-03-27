@@ -15,15 +15,12 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "^19.2.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
-    "lefthook": "^2.1.4",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
     "typescript": "5.9.2",

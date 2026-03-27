@@ -1,134 +1,75 @@
-# Turborepo starter
+# blode-docs
 
-This Turborepo starter is maintained by the Turborepo core team.
+Multi-tenant documentation platform — serve versioned MDX docs per tenant from a shared Next.js frontend backed by a Fastify API.
 
-## Using this example
+## Apps
 
-Run the following command:
+| App         | Description                                                                  | Port |
+| ----------- | ---------------------------------------------------------------------------- | ---- |
+| `apps/docs` | Next.js documentation frontend with dynamic tenant routing and MDX rendering | 3001 |
+| `apps/api`  | Fastify REST API for multi-tenant data, content, and Vercel Blob storage     | 3000 |
+
+## Packages
+
+| Package                   | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| `@repo/contracts`         | Zod schemas shared between frontend and API |
+| `@repo/db`                | Drizzle ORM setup and PostgreSQL migrations |
+| `@repo/models`            | Core data models                            |
+| `@repo/common`            | Shared utilities                            |
+| `@repo/validation`        | Validation logic built on `@repo/models`    |
+| `@repo/ui`                | Shared React component library              |
+| `@repo/api-client`        | HTTP client utilities for consuming the API |
+| `@repo/prebuild`          | Pre-build YAML processing                   |
+| `@repo/previewing`        | Preview data handling                       |
+| `@repo/docs-cli`          | CLI tool for docs operations                |
+| `@repo/typescript-config` | Shared `tsconfig.json` configurations       |
+| `@repo/deploy-action`     | Deployment automation helpers               |
+
+## Requirements
+
+- Node >= 18
+- npm 10.9.3
+
+## Quick Start
 
 ```sh
-npx create-turbo@latest
+npm install
+cp .env.example .env.local   # fill in DATABASE_URL, BLOB_READ_WRITE_TOKEN, etc.
+npm run dev                  # docs → http://localhost:3001  api → http://localhost:3000
 ```
 
-## What's inside?
+## Development
 
-This Turborepo includes the following packages/apps:
+```sh
+# All apps
+npm run dev
 
-### Apps and Packages
+# Single app
+npx turbo run dev --filter=docs
+npx turbo run dev --filter=api
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- Biome + Ultracite for linting and formatting
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [Biome](https://biomejs.dev/) + [Ultracite](https://www.npmjs.com/package/ultracite) for linting/formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+# Build all
+npm run build
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## Testing
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```sh
+npm run test              # full suite: unit → component → integration → smoke → e2e
+npm run test:unit         # Vitest unit tests
+npm run test:component    # Vitest component tests
+npm run test:integration  # Vitest integration tests
+npm run test:smoke        # Vitest smoke tests
+npm run test:e2e          # Playwright end-to-end tests
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## Code Quality
 
+```sh
+npm run fix           # Ultracite auto-fix (lint + format)
+npm run check         # Ultracite check without fixing
+npm run check-types   # TypeScript type check across all workspaces
+npm run lint          # Oxlint across monorepo
+npm run format        # Oxfmt across monorepo
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)

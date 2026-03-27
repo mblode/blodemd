@@ -2,9 +2,26 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "workspaces": {
     ".": {
+      "ignoreBinaries": ["knip"],
       "ignoreDependencies": ["ultracite"]
     },
     "apps/*": {},
-    "packages/*": {}
+    "apps/api": {
+      "ignoreBinaries": ["portless"],
+      "ignoreDependencies": ["tsx"]
+    },
+    "apps/docs": {
+      "ignoreBinaries": ["portless"]
+    },
+    "packages/*": {},
+    "packages/db": {
+      "entry": ["seed.ts"]
+    },
+    "packages/docs-cli": {
+      "entry": ["src/bin.ts"]
+    },
+    "packages/typescript-config": {
+      "ignoreDependencies": ["next"]
+    }
   }
 }
