@@ -6,7 +6,7 @@ import {
   PathSchema,
   SlugSchema,
   UrlSchema,
-} from "./ids";
+} from "./ids.js";
 
 export const TenantStatusSchema = z.enum(["active", "disabled"]);
 export type TenantStatus = z.infer<typeof TenantStatusSchema>;

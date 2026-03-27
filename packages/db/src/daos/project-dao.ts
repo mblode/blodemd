@@ -1,11 +1,11 @@
 // oxlint-disable eslint/class-methods-use-this
 import { desc, eq } from "drizzle-orm";
 
-import { assertRecord } from "../assert-record";
-import { db } from "../client";
-import { projects } from "../schema";
-import type { ProjectRecord } from "../types/records";
-import { projectSelect } from "../types/selects";
+import { assertRecord } from "../assert-record.js";
+import { db } from "../client.js";
+import { projects } from "../schema.js";
+import type { ProjectRecord } from "../types/records.js";
+import { projectSelect } from "../types/selects.js";
 
 export interface ProjectCreateInput {
   slug: string;

@@ -1,12 +1,12 @@
 // oxlint-disable eslint/class-methods-use-this
 import { desc, eq } from "drizzle-orm";
 
-import { assertRecord } from "../assert-record";
-import { db } from "../client";
-import type { DomainStatus } from "../schema";
-import { domains } from "../schema";
-import type { DomainRecord } from "../types/records";
-import { domainSelect } from "../types/selects";
+import { assertRecord } from "../assert-record.js";
+import { db } from "../client.js";
+import type { DomainStatus } from "../schema.js";
+import { domains } from "../schema.js";
+import type { DomainRecord } from "../types/records.js";
+import { domainSelect } from "../types/selects.js";
 
 export interface DomainCreateInput {
   projectId: string;

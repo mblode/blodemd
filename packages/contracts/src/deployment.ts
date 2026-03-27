@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { IsoDateSchema } from "./dates";
-import { IdSchema, UrlSchema } from "./ids";
+import { IsoDateSchema } from "./dates.js";
+import { IdSchema, UrlSchema } from "./ids.js";
 
 export const DeploymentStatusSchema = z.enum([
   "Queued",

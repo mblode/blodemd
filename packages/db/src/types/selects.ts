@@ -1,4 +1,4 @@
-import { apiKeys, deployments, domains, projects } from "../schema";
+import { apiKeys, deployments, domains, projects } from "../schema.js";
 
 export const projectSelect = {
   createdAt: projects.createdAt,

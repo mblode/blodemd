@@ -1,11 +1,11 @@
 // oxlint-disable eslint/class-methods-use-this
 import { desc, eq } from "drizzle-orm";
 
-import { assertRecord } from "../assert-record";
-import { db } from "../client";
-import { apiKeys } from "../schema";
-import type { ApiKeyAuthRecord, ApiKeyRecord } from "../types/records";
-import { apiKeyAuthSelect, apiKeySelect } from "../types/selects";
+import { assertRecord } from "../assert-record.js";
+import { db } from "../client.js";
+import { apiKeys } from "../schema.js";
+import type { ApiKeyAuthRecord, ApiKeyRecord } from "../types/records.js";
+import { apiKeyAuthSelect, apiKeySelect } from "../types/selects.js";
 
 export interface ApiKeyCreateInput {
   projectId: string;

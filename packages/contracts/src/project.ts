@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { IsoDateSchema } from "./dates";
-import { IdSchema, SlugSchema } from "./ids";
+import { IsoDateSchema } from "./dates.js";
+import { IdSchema, SlugSchema } from "./ids.js";
 
 export const ProjectSchema = z.object({
   createdAt: IsoDateSchema,

@@ -1,4 +1,4 @@
-import type { apiKeys, deployments, domains, projects } from "../schema";
+import type { apiKeys, deployments, domains, projects } from "../schema.js";
 
 type ProjectRow = typeof projects.$inferSelect;
 type DomainRow = typeof domains.$inferSelect;

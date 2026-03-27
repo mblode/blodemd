@@ -3,7 +3,7 @@ import type {
   DomainStatus as ContractDomainStatus,
 } from "@repo/contracts";
 
-import type { DeploymentStatus, DomainStatus } from "../schema";
+import type { DeploymentStatus, DomainStatus } from "../schema.js";
 
 const domainStatusToContract: Record<DomainStatus, ContractDomainStatus> = {
   invalid_configuration: "Invalid Configuration",

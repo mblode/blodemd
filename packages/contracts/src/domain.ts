@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { IsoDateSchema } from "./dates";
-import { HostnameSchema, IdSchema, PathSchema } from "./ids";
+import { IsoDateSchema } from "./dates.js";
+import { HostnameSchema, IdSchema, PathSchema } from "./ids.js";
 
 export const DomainStatusSchema = z.enum([
   "Valid Configuration",

@@ -1,12 +1,12 @@
 // oxlint-disable eslint/class-methods-use-this
 import { and, desc, eq, isNotNull } from "drizzle-orm";
 
-import { assertRecord } from "../assert-record";
-import { db } from "../client";
-import { deployments } from "../schema";
-import type { DeploymentEnvironment, DeploymentStatus } from "../schema";
-import type { DeploymentRecord } from "../types/records";
-import { deploymentSelect } from "../types/selects";
+import { assertRecord } from "../assert-record.js";
+import { db } from "../client.js";
+import { deployments } from "../schema.js";
+import type { DeploymentEnvironment, DeploymentStatus } from "../schema.js";
+import type { DeploymentRecord } from "../types/records.js";
+import { deploymentSelect } from "../types/selects.js";
 
 export interface DeploymentCreateInput {
   projectId: string;

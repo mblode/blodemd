@@ -1,11 +1,11 @@
 // oxlint-disable oxc/no-barrel-file
-export { db, pool } from "./client";
+export { db, pool } from "./client.js";
 // biome-ignore lint/performance/noBarrelFile: This is the main entry point for the package
-export { ApiKeyDao } from "./daos/api-key-dao";
-export { DeploymentDao } from "./daos/deployment-dao";
-export { DomainDao } from "./daos/domain-dao";
-export { ProjectDao } from "./daos/project-dao";
-export * from "./mappers/status-mappers";
-export * from "./schema";
-export * from "./types/records";
-export * from "./types/selects";
+export { ApiKeyDao } from "./daos/api-key-dao.js";
+export { DeploymentDao } from "./daos/deployment-dao.js";
+export { DomainDao } from "./daos/domain-dao.js";
+export { ProjectDao } from "./daos/project-dao.js";
+export * from "./mappers/status-mappers.js";
+export * from "./schema.js";
+export * from "./types/records.js";
+export * from "./types/selects.js";
