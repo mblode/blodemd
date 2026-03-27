@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
 import type * as RepoDb from "@repo/db";
-import type { FastifyInstance } from "fastify";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+
+import { cleanupProjectFixture, createProjectFixture } from "./test-helpers.js";
 
 type DbModule = typeof RepoDb;
 
@@ -13,84 +14,55 @@ process.env.DATABASE_URL = databaseUrl;
 process.env.NODE_ENV = "test";
 process.env.PLATFORM_ROOT_DOMAIN = "blode.md";
 
-let app: FastifyInstance;
+let request: (input: string, init?: RequestInit) => Promise<Response>;
 let dbModule: DbModule;
 
 beforeAll(async () => {
   const apiModule = await import("./index.js");
-  ({ app } = apiModule);
+  request = apiModule.app.request.bind(apiModule.app);
   dbModule = await import("@repo/db");
-  await app.ready();
-});
-
-afterAll(async () => {
-  await app.close();
 });
 
 describe("tenants resolve", () => {
   it("resolves a subdomain to a tenant", async () => {
     const projectSlug = `project-${randomUUID().slice(0, 8)}`;
-
-    const [project] = await dbModule.db
-      .insert(dbModule.projects)
-      .values({
-        deploymentName: projectSlug,
-        description: "Test project",
-        name: projectSlug,
-        slug: projectSlug,
-      })
-      .returning({ id: dbModule.projects.id });
-
-    if (!project) {
-      throw new Error("Failed to create test project.");
-    }
-
-    const response = await app.inject({
-      method: "GET",
-      url: `/tenants/resolve?host=${projectSlug}.blode.md&path=/`,
+    const fixture = await createProjectFixture(dbModule, {
+      description: "Test project",
+      slug: projectSlug,
     });
 
-    expect(response.statusCode).toBe(200);
-    const body = response.json();
+    const response = await request(
+      `/tenants/resolve?host=${projectSlug}.blode.md&path=/`
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
     expect(body.tenant.slug).toBe(projectSlug);
     expect(body.strategy).toBe("subdomain");
 
-    await new dbModule.ProjectDao().delete(project.id);
+    await cleanupProjectFixture(dbModule, fixture);
   });
 
   it("resolves a custom domain with a path prefix", async () => {
     const projectSlug = `project-${randomUUID().slice(0, 8)}`;
     const customDomain = `custom-${randomUUID().slice(0, 8)}.com`;
-
-    const [project] = await dbModule.db
-      .insert(dbModule.projects)
-      .values({
-        deploymentName: projectSlug,
-        name: projectSlug,
-        slug: projectSlug,
-      })
-      .returning({ id: dbModule.projects.id });
-
-    if (!project) {
-      throw new Error("Failed to create test project.");
-    }
+    const fixture = await createProjectFixture(dbModule, { slug: projectSlug });
 
     await dbModule.db.insert(dbModule.domains).values({
       hostname: customDomain,
       pathPrefix: "/docs",
-      projectId: project.id,
+      projectId: fixture.projectId,
     });
 
-    const response = await app.inject({
-      method: "GET",
-      url: `/tenants/resolve?host=${customDomain}&path=/docs/getting-started`,
-    });
+    const response = await request(
+      `/tenants/resolve?host=${customDomain}&path=/docs/getting-started`
+    );
 
-    expect(response.statusCode).toBe(200);
-    const body = response.json();
+    expect(response.status).toBe(200);
+    const body = await response.json();
     expect(body.strategy).toBe("custom-domain");
     expect(body.basePath).toBe("/docs");
 
-    await new dbModule.ProjectDao().delete(project.id);
+    await cleanupProjectFixture(dbModule, fixture);
   });
 });

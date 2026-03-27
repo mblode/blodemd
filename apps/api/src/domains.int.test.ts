@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
 import type * as RepoDb from "@repo/db";
-import type { FastifyInstance } from "fastify";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+
+import { cleanupProjectFixture, createProjectFixture } from "./test-helpers.js";
 
 type DbModule = typeof RepoDb;
 
@@ -13,81 +14,56 @@ process.env.DATABASE_URL = databaseUrl;
 process.env.NODE_ENV = "test";
 process.env.PLATFORM_ROOT_DOMAIN = "neue.com";
 
-let app: FastifyInstance;
+let request: (input: string, init?: RequestInit) => Promise<Response>;
 let dbModule: DbModule;
 
 beforeAll(async () => {
   const apiModule = await import("./index.js");
-  ({ app } = apiModule);
+  request = apiModule.app.request.bind(apiModule.app);
   dbModule = await import("@repo/db");
-  await app.ready();
-});
-
-afterAll(async () => {
-  await app.close();
 });
 
 describe("domains API", () => {
   it("normalizes domain input and path prefixes", async () => {
     const projectSlug = `project-${randomUUID().slice(0, 8)}`;
+    const fixture = await createProjectFixture(dbModule, { slug: projectSlug });
 
-    const [project] = await dbModule.db
-      .insert(dbModule.projects)
-      .values({
-        deploymentName: projectSlug,
-        name: projectSlug,
-        slug: projectSlug,
-      })
-      .returning({ id: dbModule.projects.id });
-
-    if (!project) {
-      throw new Error("Failed to create test project.");
-    }
-
-    const response = await app.inject({
-      method: "POST",
-      payload: {
+    const response = await request(`/projects/${fixture.projectId}/domains`, {
+      body: JSON.stringify({
         hostname: "https://docs.example.com/docs",
         pathPrefix: "docs",
+      }),
+      headers: {
+        "content-type": "application/json",
       },
-      url: `/projects/${project.id}/domains`,
+      method: "POST",
     });
 
-    expect(response.statusCode).toBe(201);
-    const body = response.json();
+    expect(response.status).toBe(201);
+    const body = await response.json();
     expect(body.domain.hostname).toBe("docs.example.com");
     expect(body.domain.pathPrefix).toBe("/docs");
     expect(body.domain.status).toBe("Pending Verification");
 
-    await new dbModule.ProjectDao().delete(project.id);
+    await cleanupProjectFixture(dbModule, fixture);
   });
 
   it("rejects neue.com as a custom domain", async () => {
     const projectSlug = `project-${randomUUID().slice(0, 8)}`;
+    const fixture = await createProjectFixture(dbModule, { slug: projectSlug });
 
-    const [project] = await dbModule.db
-      .insert(dbModule.projects)
-      .values({
-        deploymentName: projectSlug,
-        name: projectSlug,
-        slug: projectSlug,
-      })
-      .returning({ id: dbModule.projects.id });
-
-    if (!project) {
-      throw new Error("Failed to create test project.");
-    }
-
-    const response = await app.inject({
-      method: "POST",
-      payload: {
+    const response = await request(`/projects/${fixture.projectId}/domains`, {
+      body: JSON.stringify({
         hostname: "neue.com",
+      }),
+      headers: {
+        "content-type": "application/json",
       },
-      url: `/projects/${project.id}/domains`,
+      method: "POST",
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(400);
 
-    await new dbModule.ProjectDao().delete(project.id);
+    await cleanupProjectFixture(dbModule, fixture);
   });
 });

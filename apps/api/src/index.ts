@@ -1,8 +1,8 @@
 // oxlint-disable oxc/no-async-endpoint-handlers, eslint/complexity
 import { Buffer } from "node:buffer";
 
-import cors from "@fastify/cors";
-import sensible from "@fastify/sensible";
+import { serve } from "@hono/node-server";
+import { zValidator } from "@hono/zod-validator";
 import type {
   DomainVerification,
   Tenant,
@@ -10,21 +10,11 @@ import type {
 } from "@repo/contracts";
 import {
   ApiKeyCreateSchema,
-  ApiKeyCreateResponseSchema,
-  ApiKeySchema,
-  DeploymentSchema,
-  DomainCreateResponseSchema,
   DomainCreateSchema,
-  DomainSchema,
-  DomainVerificationSchema,
+  ProjectUpdateSchema,
   PublishDeploymentCreateSchema,
-  PublishDeploymentFileResponseSchema,
   PublishDeploymentFileSchema,
   PublishDeploymentFinalizeSchema,
-  ProjectSchema,
-  ProjectUpdateSchema,
-  TenantResolutionSchema,
-  TenantSchema,
 } from "@repo/contracts";
 import {
   ApiKeyDao,
@@ -33,12 +23,10 @@ import {
   mapDomainStatusFromContract,
   ProjectDao,
 } from "@repo/db";
-import Fastify from "fastify";
-import {
-  serializerCompiler,
-  validatorCompiler,
-} from "fastify-type-provider-zod";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import type { Context } from "hono";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 import { z } from "zod";
 
 import { authenticateApiKey, createApiKeyToken } from "./lib/api-key-auth.js";
@@ -70,22 +58,85 @@ const TRAILING_SLASHES_REGEX = /\/+$/;
 const LEADING_SLASHES_REGEX = /^\/+/;
 const BACKSLASH_TO_SLASH_REGEX = /\\/g;
 
-export const app = Fastify({
-  logger: true,
-}).withTypeProvider<ZodTypeProvider>();
+const domainCreateBodySchema = DomainCreateSchema.omit({ projectId: true });
+const apiKeyCreateBodySchema = ApiKeyCreateSchema.omit({ projectId: true });
+const projectIdParamsSchema = z.object({ projectId: z.string().uuid() });
+const slugParamsSchema = z.object({ slug: z.string().min(1) });
+const domainParamsSchema = projectIdParamsSchema.extend({
+  domainId: z.string().uuid(),
+});
+const deploymentParamsSchema = projectIdParamsSchema.extend({
+  deploymentId: z.string().uuid(),
+});
+const slugDeploymentParamsSchema = slugParamsSchema.extend({
+  deploymentId: z.string().uuid(),
+});
+const tenantResolveQuerySchema = z.object({
+  host: z.string().min(1),
+  path: z.string().optional(),
+});
 
-app.register(cors, { credentials: true, origin: true });
-app.register(sensible);
-app.setValidatorCompiler(validatorCompiler);
-app.setSerializerCompiler(serializerCompiler);
+const validateJson = <Schema extends z.ZodTypeAny>(schema: Schema) =>
+  zValidator("json", schema, (result, c) => {
+    if (!result.success) {
+      return c.json(
+        {
+          error: "Invalid request body.",
+          issues: result.error.issues,
+        },
+        400
+      );
+    }
+  });
+
+const validateParams = <Schema extends z.ZodTypeAny>(schema: Schema) =>
+  zValidator("param", schema, (result, c) => {
+    if (!result.success) {
+      return c.json(
+        {
+          error: "Invalid route parameters.",
+          issues: result.error.issues,
+        },
+        400
+      );
+    }
+  });
+
+const validateQuery = <Schema extends z.ZodTypeAny>(schema: Schema) =>
+  zValidator("query", schema, (result, c) => {
+    if (!result.success) {
+      return c.json(
+        {
+          error: "Invalid query parameters.",
+          issues: result.error.issues,
+        },
+        400
+      );
+    }
+  });
+
+const badGateway = (c: Context, message: string) => c.text(message, 502);
+const badRequest = (c: Context, message: string) => c.text(message, 400);
+const notFound = (c: Context) => c.text("Not Found", 404);
+const noContent = () => new Response(null, { status: 204 });
+const unauthorized = (c: Context, message: string) => c.text(message, 401);
+
+const logError = (message: string, error: unknown) => {
+  console.error(message, error);
+};
+
+const logWarn = (message: string, error: unknown) => {
+  console.warn(message, error);
+};
+
+const getHeadersRecord = (c: Context): Record<string, string> =>
+  Object.fromEntries(c.req.raw.headers.entries());
 
 const projectDao = new ProjectDao();
 const domainDao = new DomainDao();
 const deploymentDao = new DeploymentDao();
 const apiKeyDao = new ApiKeyDao();
 
-const domainCreateBodySchema = DomainCreateSchema.omit({ projectId: true });
-const apiKeyCreateBodySchema = ApiKeyCreateSchema.omit({ projectId: true });
 const rootDomain = process.env.PLATFORM_ROOT_DOMAIN ?? "blode.md";
 const autoWwwRedirect = process.env.VERCEL_AUTO_WWW_REDIRECT === "true";
 const preferCustomDomain = process.env.PREFER_CUSTOM_DOMAIN === "true";
@@ -135,6 +186,7 @@ const mapVerification = (domain: VercelProjectDomain | null) => {
 
 const normalizeHost = (host: string) =>
   host.replace(PORT_REGEX, "").toLowerCase();
+
 const normalizeHostnameInput = (value: string) => {
   const trimmed = value.trim().toLowerCase();
   const withoutProtocol = trimmed.replace(PROTOCOL_REGEX, "");
@@ -201,6 +253,7 @@ const buildTenant = async (projectId: string): Promise<Tenant | null> => {
     preferCustomDomain && preferredCustomDomain
       ? preferredCustomDomain.hostname
       : `${project.slug}.${rootDomain}`;
+
   return {
     activeDeploymentId: deployment?.manifestUrl ? deployment.id : undefined,
     activeDeploymentManifestUrl: deployment?.manifestUrl ?? undefined,
@@ -231,83 +284,51 @@ const buildTenantResolution = (
   tenant,
 });
 
-app.get(
-  "/health",
-  {
-    schema: {
-      response: {
-        200: z.object({
-          ok: z.literal(true),
-          timestamp: z.string().datetime(),
-        }),
-      },
-    },
-  },
-  () => ({
-    ok: true as const,
-    timestamp: new Date().toISOString(),
+export const app = new Hono();
+
+app.use("*", logger());
+app.use(
+  "*",
+  cors({
+    credentials: true,
+    origin: (origin) => origin || "*",
   })
 );
 
-app.get(
-  "/tenants",
-  {
-    schema: {
-      response: {
-        200: z.array(TenantSchema),
-      },
+// oxlint-disable-next-line eslint-plugin-promise/prefer-await-to-callbacks
+app.onError((error, c) => {
+  logError("Unhandled API error", error);
+  return c.text("Internal Server Error", 500);
+});
+
+app.notFound((c) => notFound(c));
+
+app.get("/health", (c) =>
+  c.json(
+    {
+      ok: true as const,
+      timestamp: new Date().toISOString(),
     },
-  },
-  async () => {
-    const projects = await projectDao.list();
-    const tenants = await Promise.all(
-      projects.map((project) => buildTenant(project.id))
-    );
-    return tenants.filter(isPresent);
-  }
+    200
+  )
 );
 
-app.get(
-  "/tenants/:slug",
-  {
-    schema: {
-      params: z.object({ slug: z.string().min(1) }),
-      response: {
-        200: TenantSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const project = await projectDao.getBySlugUnique(request.params.slug);
-    if (!project) {
-      return reply.notFound();
-    }
-    const tenant = await buildTenant(project.id);
-    if (!tenant) {
-      return reply.notFound();
-    }
-    return tenant;
-  }
-);
+app.get("/tenants", async (c) => {
+  const projects = await projectDao.list();
+  const tenants = await Promise.all(
+    projects.map((project) => buildTenant(project.id))
+  );
+  return c.json(tenants.filter(isPresent), 200);
+});
 
 app.get(
   "/tenants/resolve",
-  {
-    schema: {
-      querystring: z.object({
-        host: z.string().min(1),
-        path: z.string().optional(),
-      }),
-      response: {
-        200: TenantResolutionSchema,
-      },
-    },
-  },
-  // oxlint-disable-next-line eslint/complexity
+  validateQuery(tenantResolveQuerySchema),
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor this handler by extracting resolution strategies into separate functions
-  async (request, reply) => {
-    const host = normalizeHost(request.query.host);
-    const pathname = request.query.path ?? "/";
+  async (c) => {
+    const query = c.req.valid("query");
+    const host = normalizeHost(query.host);
+    const pathname = query.path ?? "/";
 
     const previewPrefix = host.includes("---") ? host.split("---")[0] : null;
     if (previewPrefix) {
@@ -315,18 +336,15 @@ app.get(
       if (project) {
         const tenant = await buildTenant(project.id);
         if (!tenant) {
-          return reply.notFound();
+          return notFound(c);
         }
         const slugPath = slugifyPath(pathname);
         const rewrittenPath = slugPath
           ? `/sites/${tenant.slug}/${slugPath}`
           : `/sites/${tenant.slug}/`;
-        return buildTenantResolution(
-          tenant,
-          "preview",
-          host,
-          "",
-          rewrittenPath
+        return c.json(
+          buildTenantResolution(tenant, "preview", host, "", rewrittenPath),
+          200
         );
       }
     }
@@ -335,18 +353,21 @@ app.get(
     if (domain) {
       const tenant = await buildTenant(domain.projectId);
       if (!tenant) {
-        return reply.notFound();
+        return notFound(c);
       }
       const slugPath = stripPrefix(pathname, domain.pathPrefix ?? null);
       const rewrittenPath = slugPath
         ? `/sites/${tenant.slug}/${slugPath}`
         : `/sites/${tenant.slug}/`;
-      return buildTenantResolution(
-        tenant,
-        "custom-domain",
-        host,
-        domain.pathPrefix ?? "",
-        rewrittenPath
+      return c.json(
+        buildTenantResolution(
+          tenant,
+          "custom-domain",
+          host,
+          domain.pathPrefix ?? "",
+          rewrittenPath
+        ),
+        200
       );
     }
 
@@ -361,18 +382,15 @@ app.get(
         if (project) {
           const tenant = await buildTenant(project.id);
           if (!tenant) {
-            return reply.notFound();
+            return notFound(c);
           }
           const slugPath = slugifyPath(pathname);
           const rewrittenPath = slugPath
             ? `/sites/${tenant.slug}/${slugPath}`
             : `/sites/${tenant.slug}/`;
-          return buildTenantResolution(
-            tenant,
-            "subdomain",
-            host,
-            "",
-            rewrittenPath
+          return c.json(
+            buildTenantResolution(tenant, "subdomain", host, "", rewrittenPath),
+            200
           );
         }
       }
@@ -388,18 +406,15 @@ app.get(
         if (project) {
           const tenant = await buildTenant(project.id);
           if (!tenant) {
-            return reply.notFound();
+            return notFound(c);
           }
           const slugPath = slugifyPath(pathname);
           const rewrittenPath = slugPath
             ? `/sites/${tenant.slug}/${slugPath}`
             : `/sites/${tenant.slug}/`;
-          return buildTenantResolution(
-            tenant,
-            "subdomain",
-            host,
-            "",
-            rewrittenPath
+          return c.json(
+            buildTenantResolution(tenant, "subdomain", host, "", rewrittenPath),
+            200
           );
         }
       }
@@ -414,110 +429,102 @@ app.get(
         if (project) {
           const tenant = await buildTenant(project.id);
           if (!tenant) {
-            return reply.notFound();
+            return notFound(c);
           }
           const remainder = rest.join("/");
           const rewrittenPath = remainder
             ? `/sites/${tenant.slug}/${remainder}`
             : `/sites/${tenant.slug}/`;
-          return buildTenantResolution(
-            tenant,
-            "path",
-            host,
-            `/${tenant.slug}`,
-            rewrittenPath
+          return c.json(
+            buildTenantResolution(
+              tenant,
+              "path",
+              host,
+              `/${tenant.slug}`,
+              rewrittenPath
+            ),
+            200
           );
         }
       }
     }
 
-    return reply.notFound();
+    return notFound(c);
   }
 );
 
+app.get("/tenants/:slug", validateParams(slugParamsSchema), async (c) => {
+  const { slug } = c.req.valid("param");
+  const project = await projectDao.getBySlugUnique(slug);
+  if (!project) {
+    return notFound(c);
+  }
+  const tenant = await buildTenant(project.id);
+  if (!tenant) {
+    return notFound(c);
+  }
+  return c.json(tenant, 200);
+});
+
 app.get(
   "/projects/:projectId",
-  {
-    schema: {
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        200: ProjectSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const record = await projectDao.getById(request.params.projectId);
+  validateParams(projectIdParamsSchema),
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const record = await projectDao.getById(projectId);
     if (!record) {
-      return reply.notFound();
+      return notFound(c);
     }
-    return mapProject(record);
+    return c.json(mapProject(record), 200);
   }
 );
 
 app.patch(
   "/projects/:projectId",
-  {
-    schema: {
-      body: ProjectUpdateSchema,
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        200: ProjectSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const existing = await projectDao.getById(request.params.projectId);
+  validateParams(projectIdParamsSchema),
+  validateJson(ProjectUpdateSchema),
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const existing = await projectDao.getById(projectId);
     if (!existing) {
-      return reply.notFound();
+      return notFound(c);
     }
-    const record = await projectDao.update(
-      request.params.projectId,
-      request.body
-    );
-    return mapProject(record);
+    const record = await projectDao.update(projectId, body);
+    return c.json(mapProject(record), 200);
   }
 );
 
 app.get(
   "/projects/:projectId/domains",
-  {
-    schema: {
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        200: z.array(DomainSchema),
-      },
-    },
-  },
-  async (request) => {
-    const records = await domainDao.listByProject(request.params.projectId);
-    return records.map(mapDomain);
+  validateParams(projectIdParamsSchema),
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const records = await domainDao.listByProject(projectId);
+    return c.json(records.map(mapDomain), 200);
   }
 );
 
 app.post(
   "/projects/:projectId/domains",
-  {
-    schema: {
-      body: domainCreateBodySchema,
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        201: DomainCreateResponseSchema,
-      },
-    },
-  },
+  validateParams(projectIdParamsSchema),
+  validateJson(domainCreateBodySchema),
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor this handler by extracting domain provisioning logic into separate functions
-  async (request, reply) => {
-    const hostname = normalizeHostnameInput(request.body.hostname);
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const hostname = normalizeHostnameInput(body.hostname);
     if (!hostname) {
-      return reply.badRequest("Domain hostname is required.");
+      return badRequest(c, "Domain hostname is required.");
     }
     if (hostname === rootDomain || hostname.endsWith(`.${rootDomain}`)) {
-      return reply.badRequest("Domain must be external to the neue.com zone.");
+      return badRequest(c, "Domain must be external to the neue.com zone.");
     }
+
     let verification: DomainVerification | undefined;
     let status = mapDomainStatusFromContract("Pending Verification");
     let verifiedAt: Date | null = null;
-    const pathPrefix = normalizePathPrefix(request.body.pathPrefix);
+    const pathPrefix = normalizePathPrefix(body.pathPrefix);
 
     if (isVercelEnabled()) {
       try {
@@ -548,48 +555,43 @@ app.post(
           }
         }
       } catch (error) {
-        request.log.error({ error }, "Failed to provision Vercel domain");
-        return reply.badGateway("Unable to provision domain");
+        logError("Failed to provision Vercel domain", error);
+        return badGateway(c, "Unable to provision domain");
       }
     }
 
     const record = await domainDao.create({
       hostname,
       pathPrefix,
-      projectId: request.params.projectId,
+      projectId,
       status,
       verifiedAt,
     });
 
-    return reply.code(201).send({ domain: mapDomain(record), verification });
+    return c.json({ domain: mapDomain(record), verification }, 201);
   }
 );
 
 app.get(
   "/projects/:projectId/domains/:domainId/verification",
-  {
-    schema: {
-      params: z.object({
-        domainId: z.string().uuid(),
-        projectId: z.string().uuid(),
-      }),
-      response: {
-        200: DomainVerificationSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const domain = await domainDao.getById(request.params.domainId);
-    if (!domain || domain.projectId !== request.params.projectId) {
-      return reply.notFound();
+  validateParams(domainParamsSchema),
+  async (c) => {
+    const { domainId, projectId } = c.req.valid("param");
+    const domain = await domainDao.getById(domainId);
+    if (!domain || domain.projectId !== projectId) {
+      return notFound(c);
     }
 
     if (!isVercelEnabled()) {
-      return {
-        records: [],
-        verified:
-          domain.status === mapDomainStatusFromContract("Valid Configuration"),
-      };
+      return c.json(
+        {
+          records: [],
+          verified:
+            domain.status ===
+            mapDomainStatusFromContract("Valid Configuration"),
+        },
+        200
+      );
     }
 
     try {
@@ -604,39 +606,34 @@ app.get(
           verifiedAt: new Date(),
         });
       }
-      return verification;
+      return c.json(verification, 200);
     } catch (error) {
-      request.log.error({ error }, "Failed to fetch domain verification");
-      return reply.badGateway("Unable to fetch domain verification");
+      logError("Failed to fetch domain verification", error);
+      return badGateway(c, "Unable to fetch domain verification");
     }
   }
 );
 
 app.post(
   "/projects/:projectId/domains/:domainId/verify",
-  {
-    schema: {
-      params: z.object({
-        domainId: z.string().uuid(),
-        projectId: z.string().uuid(),
-      }),
-      response: {
-        200: DomainVerificationSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const domain = await domainDao.getById(request.params.domainId);
-    if (!domain || domain.projectId !== request.params.projectId) {
-      return reply.notFound();
+  validateParams(domainParamsSchema),
+  async (c) => {
+    const { domainId, projectId } = c.req.valid("param");
+    const domain = await domainDao.getById(domainId);
+    if (!domain || domain.projectId !== projectId) {
+      return notFound(c);
     }
 
     if (!isVercelEnabled()) {
-      return {
-        records: [],
-        verified:
-          domain.status === mapDomainStatusFromContract("Valid Configuration"),
-      };
+      return c.json(
+        {
+          records: [],
+          verified:
+            domain.status ===
+            mapDomainStatusFromContract("Valid Configuration"),
+        },
+        200
+      );
     }
 
     try {
@@ -651,188 +648,147 @@ app.post(
           verifiedAt: new Date(),
         });
       }
-      return verification;
+      return c.json(verification, 200);
     } catch (error) {
-      request.log.error({ error }, "Failed to verify domain");
-      return reply.badGateway("Unable to verify domain");
+      logError("Failed to verify domain", error);
+      return badGateway(c, "Unable to verify domain");
     }
   }
 );
 
 app.delete(
   "/projects/:projectId/domains/:domainId",
-  {
-    schema: {
-      params: z.object({
-        domainId: z.string().uuid(),
-        projectId: z.string().uuid(),
-      }),
-      response: {
-        204: z.null(),
-      },
-    },
-  },
-  async (request, reply) => {
-    const domain = await domainDao.getById(request.params.domainId);
-    if (!domain || domain.projectId !== request.params.projectId) {
-      return reply.notFound();
+  validateParams(domainParamsSchema),
+  async (c) => {
+    const { domainId, projectId } = c.req.valid("param");
+    const domain = await domainDao.getById(domainId);
+    if (!domain || domain.projectId !== projectId) {
+      return notFound(c);
     }
 
     if (isVercelEnabled()) {
       try {
         await removeProjectDomain(domain.hostname, true);
         await deleteDomain(domain.hostname).catch((error: unknown) => {
-          request.log.warn({ error }, "Failed to delete Vercel domain");
+          logWarn("Failed to delete Vercel domain", error);
         });
       } catch (error) {
-        request.log.error({ error }, "Failed to remove Vercel domain");
-        return reply.badGateway("Unable to remove domain");
+        logError("Failed to remove Vercel domain", error);
+        return badGateway(c, "Unable to remove domain");
       }
     }
 
     await domainDao.delete(domain.id);
-    return reply.code(204).send(null);
+    return noContent();
   }
 );
 
 app.get(
   "/projects/:projectId/deployments",
-  {
-    schema: {
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        200: z.array(DeploymentSchema),
-      },
-    },
-  },
-  async (request) => {
-    const records = await deploymentDao.listByProject(request.params.projectId);
-    return records.map(mapDeployment);
+  validateParams(projectIdParamsSchema),
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const records = await deploymentDao.listByProject(projectId);
+    return c.json(records.map(mapDeployment), 200);
   }
 );
 
 app.patch(
   "/projects/:projectId/deployments/:deploymentId",
-  {
-    schema: {
-      params: z.object({
-        deploymentId: z.string().uuid(),
-        projectId: z.string().uuid(),
-      }),
-      response: {
-        200: DeploymentSchema,
-      },
-    },
-  },
-  async (request, reply) => {
+  validateParams(deploymentParamsSchema),
+  async (c) => {
+    const { deploymentId, projectId } = c.req.valid("param");
     const deployment = await deploymentDao.getByProjectId(
-      request.params.projectId,
-      request.params.deploymentId
+      projectId,
+      deploymentId
     );
     if (!deployment) {
-      return reply.notFound();
+      return notFound(c);
     }
     const record = await deploymentDao.update(deployment.id, {
       promotedAt: new Date(),
       status: "successful",
     });
-    return mapDeployment(record);
+    return c.json(mapDeployment(record), 200);
   }
 );
 
 app.post(
   "/projects/slug/:slug/deployments",
-  {
-    schema: {
-      body: PublishDeploymentCreateSchema,
-      params: z.object({ slug: z.string().min(1) }),
-      response: {
-        201: DeploymentSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const apiKey = await authenticateApiKey(
-      request.headers as Record<string, unknown>,
-      apiKeyDao
-    );
+  validateParams(slugParamsSchema),
+  validateJson(PublishDeploymentCreateSchema),
+  async (c) => {
+    const { slug } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const apiKey = await authenticateApiKey(getHeadersRecord(c), apiKeyDao);
     if (!apiKey) {
-      return reply.unauthorized("Invalid API key.");
+      return unauthorized(c, "Invalid API key.");
     }
 
-    const project = await projectDao.getBySlugUnique(request.params.slug);
+    const project = await projectDao.getBySlugUnique(slug);
     if (!project || project.id !== apiKey.projectId) {
-      return reply.notFound();
+      return notFound(c);
     }
 
-    if (request.body.environment === "preview") {
-      return reply.badRequest("Preview deployments are not supported.");
+    if (body.environment === "preview") {
+      return badRequest(c, "Preview deployments are not supported.");
     }
 
     const record = await deploymentDao.create({
-      branch: request.body.branch ?? "main",
-      changes: request.body.changes ?? null,
-      commitMessage: request.body.commitMessage ?? null,
+      branch: body.branch ?? "main",
+      changes: body.changes ?? null,
+      commitMessage: body.commitMessage ?? null,
       environment: "production",
       projectId: project.id,
       status: "building",
     });
-    return reply.code(201).send(mapDeployment(record));
+    return c.json(mapDeployment(record), 201);
   }
 );
 
 app.post(
   "/projects/slug/:slug/deployments/:deploymentId/files",
-  {
-    schema: {
-      body: PublishDeploymentFileSchema,
-      params: z.object({
-        deploymentId: z.string().uuid(),
-        slug: z.string().min(1),
-      }),
-      response: {
-        200: PublishDeploymentFileResponseSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const apiKey = await authenticateApiKey(
-      request.headers as Record<string, unknown>,
-      apiKeyDao
-    );
+  validateParams(slugDeploymentParamsSchema),
+  validateJson(PublishDeploymentFileSchema),
+  async (c) => {
+    const { deploymentId, slug } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const apiKey = await authenticateApiKey(getHeadersRecord(c), apiKeyDao);
     if (!apiKey) {
-      return reply.unauthorized("Invalid API key.");
+      return unauthorized(c, "Invalid API key.");
     }
 
-    const project = await projectDao.getBySlugUnique(request.params.slug);
+    const project = await projectDao.getBySlugUnique(slug);
     if (!project || project.id !== apiKey.projectId) {
-      return reply.notFound();
+      return notFound(c);
     }
 
     const deployment = await deploymentDao.getByProjectId(
       project.id,
-      request.params.deploymentId
+      deploymentId
     );
     if (!deployment) {
-      return reply.notFound();
+      return notFound(c);
     }
 
     if (!["building", "queued"].includes(deployment.status)) {
-      return reply.badRequest("Deployment is not accepting files.");
+      return badRequest(c, "Deployment is not accepting files.");
     }
 
     try {
-      const content = Buffer.from(request.body.contentBase64, "base64");
-      return await uploadDeploymentFile({
+      const content = Buffer.from(body.contentBase64, "base64");
+      const record = await uploadDeploymentFile({
         content,
-        contentType: request.body.contentType,
+        contentType: body.contentType,
         deploymentId: deployment.id,
         projectSlug: project.slug,
-        relativePath: request.body.path,
+        relativePath: body.path,
       });
+      return c.json(record, 200);
     } catch (error) {
-      request.log.error({ error }, "Failed to upload deployment file");
-      return reply.badRequest(
+      logError("Failed to upload deployment file", error);
+      return badRequest(
+        c,
         error instanceof Error ? error.message : "Unable to upload file."
       );
     }
@@ -841,38 +797,27 @@ app.post(
 
 app.post(
   "/projects/slug/:slug/deployments/:deploymentId/finalize",
-  {
-    schema: {
-      body: PublishDeploymentFinalizeSchema,
-      params: z.object({
-        deploymentId: z.string().uuid(),
-        slug: z.string().min(1),
-      }),
-      response: {
-        200: DeploymentSchema,
-      },
-    },
-  },
-  async (request, reply) => {
-    const apiKey = await authenticateApiKey(
-      request.headers as Record<string, unknown>,
-      apiKeyDao
-    );
+  validateParams(slugDeploymentParamsSchema),
+  validateJson(PublishDeploymentFinalizeSchema),
+  async (c) => {
+    const { deploymentId, slug } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const apiKey = await authenticateApiKey(getHeadersRecord(c), apiKeyDao);
     if (!apiKey) {
-      return reply.unauthorized("Invalid API key.");
+      return unauthorized(c, "Invalid API key.");
     }
 
-    const project = await projectDao.getBySlugUnique(request.params.slug);
+    const project = await projectDao.getBySlugUnique(slug);
     if (!project || project.id !== apiKey.projectId) {
-      return reply.notFound();
+      return notFound(c);
     }
 
     const deployment = await deploymentDao.getByProjectId(
       project.id,
-      request.params.deploymentId
+      deploymentId
     );
     if (!deployment) {
-      return reply.notFound();
+      return notFound(c);
     }
 
     try {
@@ -880,7 +825,7 @@ app.post(
         deploymentId: deployment.id,
         projectSlug: project.slug,
       });
-      const shouldPromote = request.body.promote !== false;
+      const shouldPromote = body.promote !== false;
       const updated = await deploymentDao.update(deployment.id, {
         fileCount: manifest.fileCount,
         manifestUrl: manifest.manifestUrl,
@@ -892,15 +837,16 @@ app.post(
         try {
           await revalidateProject(project.slug);
         } catch (error) {
-          request.log.warn({ error }, "Failed to revalidate docs project");
+          logWarn("Failed to revalidate docs project", error);
         }
       }
 
-      return mapDeployment(updated);
+      return c.json(mapDeployment(updated), 200);
     } catch (error) {
       await deploymentDao.update(deployment.id, { status: "failed" });
-      request.log.error({ error }, "Failed to finalize deployment");
-      return reply.badRequest(
+      logError("Failed to finalize deployment", error);
+      return badRequest(
+        c,
         error instanceof Error
           ? error.message
           : "Unable to finalize deployment."
@@ -911,52 +857,48 @@ app.post(
 
 app.get(
   "/projects/:projectId/api-keys",
-  {
-    schema: {
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        200: z.array(ApiKeySchema),
-      },
-    },
-  },
-  async (request) => {
-    const records = await apiKeyDao.listByProject(request.params.projectId);
-    return records.map(mapApiKey);
+  validateParams(projectIdParamsSchema),
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const records = await apiKeyDao.listByProject(projectId);
+    return c.json(records.map(mapApiKey), 200);
   }
 );
 
 app.post(
   "/projects/:projectId/api-keys",
-  {
-    schema: {
-      body: apiKeyCreateBodySchema,
-      params: z.object({ projectId: z.string().uuid() }),
-      response: {
-        201: ApiKeyCreateResponseSchema,
-      },
-    },
-  },
-  async (request, reply) => {
+  validateParams(projectIdParamsSchema),
+  validateJson(apiKeyCreateBodySchema),
+  async (c) => {
+    const { projectId } = c.req.valid("param");
+    const body = c.req.valid("json");
     const { prefix, token, tokenHash } = createApiKeyToken();
     const record = await apiKeyDao.create({
-      name: request.body.name,
+      name: body.name,
       prefix,
-      projectId: request.params.projectId,
+      projectId,
       tokenHash,
     });
-    return reply.code(201).send({
-      apiKey: mapApiKey(record),
-      token,
-    });
+    return c.json(
+      {
+        apiKey: mapApiKey(record),
+        token,
+      },
+      201
+    );
   }
 );
 
-const start = async () => {
+const start = () => {
   try {
     const port = Number(process.env.PORT ?? 4000);
-    await app.listen({ host: "0.0.0.0", port });
+    serve({
+      fetch: app.fetch,
+      hostname: "0.0.0.0",
+      port,
+    });
   } catch (error) {
-    app.log.error(error);
+    logError("Failed to start API server", error);
     process.exit(1);
   }
 };

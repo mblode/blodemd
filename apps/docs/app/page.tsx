@@ -9,10 +9,10 @@ export default function RuntimeHome() {
           open a local preview at <code>/sites/atlas</code>.
         </p>
         <div className="runtime-actions">
-          <a className="runtime-link" href="/sites/atlas">
+          <a className="runtime-link" href="https://atlas.blode.md">
             Open Atlas docs
           </a>
-          <a className="runtime-link" href="/sites/orbit">
+          <a className="runtime-link" href="https://orbit.blode.md">
             Open Orbit docs
           </a>
         </div>
