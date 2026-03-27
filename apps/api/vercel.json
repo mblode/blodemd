@@ -1,5 +1,5 @@
 {
   "buildCommand": "npx turbo run build --filter=api...",
-  "outputDirectory": "apps/api/dist",
+  "outputDirectory": "dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }
