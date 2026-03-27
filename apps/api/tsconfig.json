@@ -4,9 +4,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "rewriteRelativeImportExtensions": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strictNullChecks": true
   },
   "include": ["src/**/*.ts"],
