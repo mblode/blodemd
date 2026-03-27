@@ -25,7 +25,12 @@ export const resolveTenant = async (host: string, pathname: string) => {
   const url = new URL("/tenants/resolve", apiBase);
   url.searchParams.set("host", host);
   url.searchParams.set("path", pathname);
-  const response = await fetch(url.toString(), { next: { revalidate: 5 } });
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), { next: { revalidate: 5 } });
+  } catch {
+    return null;
+  }
   if (!response.ok) {
     return null;
   }
