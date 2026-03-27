@@ -25,14 +25,15 @@
     "knip": "DATABASE_URL=postgresql://localhost/dummy npx knip"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
+    "@changesets/cli": "^2.30.0",
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.8.0",
-    "jsdom": "^26.1.0",
+    "jsdom": "^29.0.1",
     "lefthook": "^2.1.4",
-    "turbo": "^2.7.2",
-    "typescript": "5.9.2",
+    "turbo": "^2.8.20",
+    "typescript": "6.0.2",
     "ultracite": "^7.0.5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">=18"

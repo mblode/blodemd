@@ -16,9 +16,7 @@ export type ValidationResult<T> =
 
 const formatIssues = (issues: { path: PropertyKey[]; message: string }[]) =>
   issues.map((issue) => {
-    const path = issue.path.length
-      ? issue.path.map((part) => String(part)).join(".")
-      : "root";
+    const path = issue.path.length ? issue.path.map(String).join(".") : "root";
     return `${path}: ${issue.message}`;
   });
 

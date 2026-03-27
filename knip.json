@@ -17,7 +17,7 @@
     "packages/db": {
       "entry": ["seed.ts"]
     },
-    "packages/docs-cli": {
+    "apps/cli": {
       "entry": ["src/bin.ts"]
     },
     "packages/typescript-config": {

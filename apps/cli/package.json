@@ -1,13 +1,15 @@
 {
-  "name": "@repo/docs-cli",
-  "version": "0.0.0",
-  "private": true,
+  "name": "blode-docs",
+  "version": "0.0.2",
   "bin": {
-    "blode-docs": "./bin.js",
-    "docs-cli": "./bin.js"
+    "blode-docs": "./dist/bin.mjs"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "scripts": {
+    "build": "tsdown src/bin.ts --format esm --platform node --no-dts --out-dir dist",
     "check-types": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
@@ -19,6 +21,7 @@
     "@types/node": "^22.15.3",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
+    "tsdown": "^0.21.5",
     "ultracite": "^7.3.2"
   }
 }

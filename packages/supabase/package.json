@@ -22,16 +22,16 @@
     "format:check": "oxfmt ."
   },
   "dependencies": {
-    "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.52.0"
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.100.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "@types/node": "^22.15.3",
-    "next": "16.1.0",
+    "@types/node": "^22.19.15",
+    "next": "16.2.1",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
-    "typescript": "5.9.2",
+    "typescript": "6.0.2",
     "ultracite": "^7.3.2"
   },
   "peerDependencies": {

@@ -19,10 +19,10 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.19.15",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
-    "typescript": "5.9.2",
+    "typescript": "6.0.2",
     "ultracite": "^7.3.2"
   }
 }
