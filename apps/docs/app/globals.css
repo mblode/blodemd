@@ -341,6 +341,7 @@
 
   [data-rehype-pretty-code-figure] {
     position: relative;
+    margin-top: calc(var(--spacing) * 6);
     overflow: hidden;
     font-size: var(--text-sm);
     color: var(--color-code-foreground);

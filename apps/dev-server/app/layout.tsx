@@ -3,7 +3,7 @@ import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
-import "@/app/globals.css";
+import "./globals.css";
 import Script from "next/script";
 
 const glide = localFont({
