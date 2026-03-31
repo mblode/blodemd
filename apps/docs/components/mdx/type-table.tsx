@@ -14,7 +14,7 @@ export const TypeTable = ({ type }: { type: Record<string, TypeField> }) => {
   const hasDefault = entries.some((entry) => entry.default);
 
   return (
-    <div className="no-scrollbar my-4 w-full overflow-y-auto rounded-xl border border-border">
+    <div className="no-scrollbar my-4 w-full overflow-auto rounded-xl border border-border">
       <table className="relative w-full overflow-hidden border-none text-sm">
         <thead>
           <tr>
