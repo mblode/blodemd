@@ -15,7 +15,7 @@ allowed-tools: Bash(npx blodemd *), Bash(blodemd *)
 Scaffold, preview, and deploy MDX documentation sites from the terminal. One deploy publishes the HTML and its agent-readable twins (\`llms.txt\`, \`llms-full.txt\`, per-page \`.md\`) from the same commit, so what an agent reads is what was merged.
 
 - **IS:** running the \`blodemd\` CLI end to end (auth, scaffold, validate, preview, push) and confirming the published site serves its agent-readable exports.
-- **IS NOT:** writing the docs prose, designing the site, or implementing agent-readiness on sites Blode.md does not host. Blode.md owns the machine-readable surfaces; the writer owns the content and \`docs.json\`.
+- **IS NOT:** writing the docs prose, designing the site, or implementing agent-readiness on sites Blode.md does not host (that is the \`agent-ready\` skill where installed). Blode.md owns the machine-readable surfaces; the writer owns the content and \`docs.json\`.
 
 ## Auth
 
@@ -46,6 +46,8 @@ Docs progress:
 \`\`\`
 
 Steps 1 to 3 are local and reversible: run, fix, and rerun them without checking in. Step 4 publishes to a public URL, so confirm the project slug and the target site before the first push to a project.
+
+Done when \`validate\` reports no errors, \`push\` reports \`Published\`, and Step 5 quotes \`200\` with \`text/markdown\` for a twin on the live site. A local preview alone is not done.
 
 ### Step 1: Scaffold a new docs site
 
@@ -105,7 +107,9 @@ Blode.md generates these from the MDX and \`docs.json\`; do not hand-author copi
 | \`/<page>.md\`, or \`Accept: text/markdown\` on the HTML URL | The page as markdown, opening with a blockquote that links the HTML page and \`llms.txt\`                                                                                          | Frontmatter and body                                                                                                        |
 | \`Link\` header on every HTML page                         | \`llms.txt\`, \`llms-full.txt\`, the skills index, and the page's markdown alternate                                                                                                 | Nothing; always on                                                                                                          |
 | \`/.well-known/skills/index.json\`                         | A generated skill describing the site for agents that install skills                                                                                                             | \`name\` and \`description\` in \`docs.json\`                                                                                     |
-| \`/robots.txt\`, \`/sitemap.xml\`                            | Crawler files with the same page set                                                                                                                                             | \`seo.indexing\` in \`docs.json\`                                                                                               |
+| \`/mcp\` on the site host                                  | MCP server over the same pages with search, fetch-by-path, and list tools, advertised at \`/.well-known/mcp/server-card.json\`                                                     | Nothing; always on                                                                                                          |
+| \`X-Llms-Txt\` header on every response                    | The \`llms.txt\` path, for clients that read headers before bodies                                                                                                                 | Nothing; always on                                                                                                          |
+| \`/robots.txt\`, \`/sitemap.xml\`                            | Crawler files with the same page set; \`robots.txt\` also carries comments naming \`llms.txt\`, \`llms-full.txt\`, the \`.md\` convention, and the skills index                          | \`seo.indexing\` in \`docs.json\`                                                                                               |
 
 Two writer-side facts follow from how agents read. Agents choose a page from its \`llms.txt\` line, so a page without a frontmatter \`description\` lists as a bare title and gets skipped or guessed at; give every page a one-line description that says what question it answers. And agents act on what they fetch without checking the version, so docs should publish from the merge that changed the product (GitHub App or CI push on \`main\`), not from a later manual push.
 
