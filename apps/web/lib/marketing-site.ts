@@ -3,12 +3,6 @@ import type { Metadata } from "next";
 /** Public marketing home. Apex marketing pages on blode.md 301 here. */
 export const MARKETING_HOME = "https://blode.co/edda";
 
-/**
- * Canonical marketing origin for JSON-LD and CTAs.
- * Product hosts (docs, dashboard, API, tenant sites) stay on blode.md.
- */
-export const MARKETING_ORIGIN = MARKETING_HOME;
-
 /** Product host: docs, dashboard, API, legal pages, tenant `*.blode.md` sites. */
 export const PLATFORM_ORIGIN = "https://blode.md";
 
@@ -52,13 +46,6 @@ export const PLATFORM_PAGES = {
 export type PlatformPath = keyof typeof PLATFORM_PAGES;
 
 export const PLATFORM_PATHS = Object.keys(PLATFORM_PAGES) as PlatformPath[];
-
-/** @deprecated Use PLATFORM_PAGES — only remaining on-host canonical pages. */
-export const CANONICAL_PAGES = PLATFORM_PAGES;
-
-export type CanonicalPath = PlatformPath;
-
-export const CANONICAL_PATHS = PLATFORM_PATHS;
 
 export const isRedirectedMarketingPath = (path: string): boolean => {
   if (

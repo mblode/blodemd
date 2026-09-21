@@ -1,21 +1,19 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-export const CLI_BIN = "edda";
-export const CLI_PACKAGE_NAME = "edda-docs";
 export const DEV_PACKAGE_NAME = "edda-docs-dev";
 const CONFIG_DIR_NAME = "blodemd";
 
-export const BLODE_API_URL_ENV = "BLODEMD_API_URL";
-export const BLODE_API_KEY_ENV = "BLODEMD_API_KEY";
-export const BLODE_PROJECT_ENV = "BLODEMD_PROJECT";
-export const BLODE_BRANCH_ENV = "BLODEMD_BRANCH";
-export const BLODE_COMMIT_MESSAGE_ENV = "BLODEMD_COMMIT_MESSAGE";
-export const EDDA_API_URL_ENV = "EDDA_API_URL";
-export const EDDA_API_KEY_ENV = "EDDA_API_KEY";
-export const EDDA_PROJECT_ENV = "EDDA_PROJECT";
-export const EDDA_BRANCH_ENV = "EDDA_BRANCH";
-export const EDDA_COMMIT_MESSAGE_ENV = "EDDA_COMMIT_MESSAGE";
+const BLODE_API_URL_ENV = "BLODEMD_API_URL";
+const BLODE_API_KEY_ENV = "BLODEMD_API_KEY";
+const BLODE_PROJECT_ENV = "BLODEMD_PROJECT";
+const BLODE_BRANCH_ENV = "BLODEMD_BRANCH";
+const BLODE_COMMIT_MESSAGE_ENV = "BLODEMD_COMMIT_MESSAGE";
+const EDDA_API_URL_ENV = "EDDA_API_URL";
+const EDDA_API_KEY_ENV = "EDDA_API_KEY";
+const EDDA_PROJECT_ENV = "EDDA_PROJECT";
+const EDDA_BRANCH_ENV = "EDDA_BRANCH";
+const EDDA_COMMIT_MESSAGE_ENV = "EDDA_COMMIT_MESSAGE";
 
 const readFirstEnv = (...keys: string[]): string | undefined => {
   for (const key of keys) {

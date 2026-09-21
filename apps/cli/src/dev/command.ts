@@ -10,6 +10,7 @@ import { intro, log } from "@clack/prompts";
 import chalk from "chalk";
 import open from "open";
 
+import { DEV_PACKAGE_NAME } from "../constants.js";
 import { CliError, EXIT_CODES, toCliError } from "../errors.js";
 import { parsePort } from "../validation.js";
 import { resolveDocsRoot, validateDocsRoot } from "./resolve-root.js";
@@ -20,7 +21,6 @@ const DEV_READY_TIMEOUT_MS = 45_000;
 const DEV_PORT_SCAN_LIMIT = 10;
 const DEV_SHUTDOWN_TIMEOUT_MS = 5000;
 const LOCALHOST = "127.0.0.1";
-const DEV_PACKAGE_NAME = "edda-docs-dev";
 
 type PortAvailabilityProbe = (port: number) => Promise<boolean>;
 
