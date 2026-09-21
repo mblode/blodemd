@@ -114,7 +114,7 @@ describe("buildDevServerLaunch", () => {
     );
     expect(launch.args).toEqual([
       "-y",
-      "blodemd-dev@1.2.3",
+      "@blode/edda-dev@1.2.3",
       "dev",
       "--port",
       "3140",

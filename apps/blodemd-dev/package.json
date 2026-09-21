@@ -1,13 +1,14 @@
 {
-  "name": "blodemd-dev",
+  "name": "@blode/edda-dev",
   "version": "0.2.2",
-  "description": "Blode.md dev server runtime (companion package for blodemd)",
+  "description": "Edda dev server runtime (companion package for @blode/edda)",
   "repository": {
     "type": "git",
     "url": "https://github.com/mblode/blodemd"
   },
   "bin": {
-    "blodemd-dev": "./dist/dev.mjs"
+    "blodemd-dev": "./dist/dev.mjs",
+    "edda-dev": "./dist/dev.mjs"
   },
   "files": [
     "dist",
