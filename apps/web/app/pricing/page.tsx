@@ -24,7 +24,7 @@ import {
 
 const pricingDescription =
   "Edda pricing for knowledge docs for agents. Hosted is $0 with unlimited seats. No visual editor, no marketplace, no SOC 2. MIT CLI and renderer if you self-host.";
-const pricingTitle = "Pricing for knowledge docs for agents";
+const pricingTitle = "Pricing";
 
 export const metadata = pageMetadata({
   description: pricingDescription,
