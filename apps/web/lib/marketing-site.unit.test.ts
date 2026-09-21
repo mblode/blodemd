@@ -65,15 +65,20 @@ describe("marketing vs product hosts", () => {
 
   it("301s apex / on blode.md and www.blode.md only", () => {
     const config = readFileSync(join(here, "../next.config.js"), "utf8");
-    expect(config).toContain("redirects()");
-    expect(config).toMatch(/statusCode:\s*301/);
-    expect(config).toContain('"blode.md"');
-    expect(config).toContain('"www.blode.md"');
-    expect(config).toContain("destination: marketingHome");
-    expect(config).toContain('source: "/"');
-    expect(config).not.toMatch(/source:\s*"\/about"/);
-    expect(config).not.toMatch(/source:\s*"\/docs"/);
-    expect(config).not.toMatch(/source:\s*"\/app"/);
+    const redirects = config.match(/redirects\(\)\s*\{[\s\S]*?\n {2}\},/)?.[0];
+    expect(redirects).toBeDefined();
+    expect(redirects).toMatch(/statusCode:\s*301/);
+    expect(redirects).toContain('"blode.md"');
+    expect(redirects).toContain('"www.blode.md"');
+    expect(redirects).toContain("destination: marketingHome");
+    expect(redirects).toContain('source: "/"');
+    expect(redirects).not.toContain("/about");
+    expect(redirects).not.toContain("/docs");
+    expect(redirects).not.toContain("/app");
+    expect(redirects).not.toContain("/oauth");
+    expect(redirects).not.toContain("/api");
+    expect(redirects).not.toContain("/pricing");
+    expect(redirects).not.toContain("/blog");
   });
 });
 
