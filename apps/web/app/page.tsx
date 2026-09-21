@@ -251,7 +251,7 @@ export default function HomePage() {
                 <div className="relative overflow-hidden rounded-xl bg-surface px-6 pb-6 pt-14 font-mono text-sm md:p-8 md:pt-8">
                   <CopyButton
                     className="absolute right-3 top-3 text-muted-foreground"
-                    content={`npm i -g @blode/edda\nedda login\nedda new docs\nedda push docs`}
+                    content={`npm i -g edda-docs\nedda login\nedda new docs\nedda push docs`}
                     size="sm"
                     variant="ghost"
                   />
@@ -260,7 +260,7 @@ export default function HomePage() {
                       <p className="text-muted-foreground"># install the CLI</p>
                       <p className="break-words">
                         <span className="text-muted-foreground">$</span> npm i
-                        -g @blode/edda
+                        -g edda-docs
                       </p>
                     </div>
                     <div>

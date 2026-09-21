@@ -2,8 +2,8 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 export const CLI_BIN = "edda";
-export const CLI_PACKAGE_NAME = "@blode/edda";
-export const DEV_PACKAGE_NAME = "@blode/edda-dev";
+export const CLI_PACKAGE_NAME = "edda-docs";
+export const DEV_PACKAGE_NAME = "edda-docs-dev";
 const CONFIG_DIR_NAME = "blodemd";
 
 export const BLODE_API_URL_ENV = "BLODEMD_API_URL";

@@ -20,7 +20,7 @@ const DEV_READY_TIMEOUT_MS = 45_000;
 const DEV_PORT_SCAN_LIMIT = 10;
 const DEV_SHUTDOWN_TIMEOUT_MS = 5000;
 const LOCALHOST = "127.0.0.1";
-const DEV_PACKAGE_NAME = "@blode/edda-dev";
+const DEV_PACKAGE_NAME = "edda-docs-dev";
 
 type PortAvailabilityProbe = (port: number) => Promise<boolean>;
 

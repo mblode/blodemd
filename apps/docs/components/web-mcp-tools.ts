@@ -28,7 +28,7 @@ const buildTools = (): WebMCPTool[] => [
       const variant =
         template === "starter" || template === "minimal" ? template : "minimal";
       return {
-        command: `npx @blode/edda new docs --slug ${projectSlug} --template ${variant} -y`,
+        command: `npx edda-docs new docs --slug ${projectSlug} --template ${variant} -y`,
       };
     },
     inputSchema: {
@@ -57,7 +57,7 @@ const buildTools = (): WebMCPTool[] => [
       const projectSlug =
         typeof project === "string" && project ? project : "my-docs";
       return {
-        command: `npx @blode/edda push ${dir} --project ${projectSlug}`,
+        command: `npx edda-docs push ${dir} --project ${projectSlug}`,
       };
     },
     inputSchema: {

@@ -22,7 +22,7 @@ Sign in with GitHub and push. You do not run Docusaurus to get a public URL.
 Or use the CLI:
 
 \`\`\`
-npm i -g @blode/edda
+npm i -g edda-docs
 edda login
 edda new docs
 edda push docs

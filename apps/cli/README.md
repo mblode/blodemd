@@ -3,7 +3,7 @@
 <p align="center">Deploy and manage documentation sites from the command line.</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@blode/edda"><img src="https://img.shields.io/npm/v/@blode/edda.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/edda-docs"><img src="https://img.shields.io/npm/v/edda-docs.svg" alt="npm version"></a>
 </p>
 
 - **One-command deploy:** Push your entire docs folder to Edda with `edda push`.
@@ -14,13 +14,13 @@
 ## Install
 
 ```bash
-npm install -g @blode/edda
+npm install -g edda-docs
 ```
 
 Or run without installing:
 
 ```bash
-npx @blode/edda
+npx edda-docs
 ```
 
 Requires Node.js 24.x.
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - run: npx @blode/edda@latest push --project your-project-slug
+      - run: npx edda-docs@latest push --project your-project-slug
         env:
           BLODEMD_API_KEY: ${{ secrets.BLODEMD_API_KEY }}
 ```

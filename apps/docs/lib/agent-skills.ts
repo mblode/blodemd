@@ -7,7 +7,7 @@ name: edda
 description: Scaffolds, previews, and deploys MDX documentation sites with Edda, then verifies the llms.txt, llms-full.txt, and per-page .md exports the deploy publishes for AI agents. Use when the user wants to create a docs site, validate docs.json, preview locally, push or deploy docs to Edda, set up docs CI, or make Edda docs readable by agents. Triggers include "create docs", "deploy docs", "push docs", "preview docs", "scaffold a docs site", "validate docs.json", "set up docs deploys in CI".
 user-invocable: true
 argument-hint: <command> [options]
-allowed-tools: Bash(npx @blode/edda *), Bash(edda *)
+allowed-tools: Bash(npx edda-docs *), Bash(edda *)
 ---
 
 # Edda
@@ -22,16 +22,16 @@ Scaffold, preview, and deploy MDX documentation sites from the terminal. One dep
 Check before any deploy:
 
 \`\`\`bash
-npx @blode/edda whoami
+npx edda-docs whoami
 \`\`\`
 
 Three credential paths, in the order the CLI resolves them:
 
 - \`--api-key\` or \`BLODEMD_API_KEY\`: a project-scoped deploy key (\`bmd_...\`) for CI. Created in the dashboard under Settings, Deploy keys, or printed once when a logged-in \`edda push\` creates a new project. It belongs in a CI secret. Never ask the user to paste a key into the chat and never write one into the repo.
-- Stored session from \`npx @blode/edda login\`: browser GitHub sign-in, cached and auto-refreshed. An agent cannot finish the browser step, so when \`whoami\` says \`Not logged in\`, ask the user to run that one command in their own terminal, then rerun \`whoami\`.
+- Stored session from \`npx edda-docs login\`: browser GitHub sign-in, cached and auto-refreshed. An agent cannot finish the browser step, so when \`whoami\` says \`Not logged in\`, ask the user to run that one command in their own terminal, then rerun \`whoami\`.
 - GitHub App from \`/app/<project>/git\` in the dashboard: pushes to the configured branch deploy with no CLI at all. Recommend it whenever the docs live in a repo, because it removes the lag between merge and published docs.
 
-In non-interactive runs pass \`-y\` to \`new\` and \`--json\` to \`validate\`, \`push\`, \`whoami\`, and \`projects\`. \`npx @blode/edda schema\` prints the CLI contract as JSON when you need the exact options.
+In non-interactive runs pass \`-y\` to \`new\` and \`--json\` to \`validate\`, \`push\`, \`whoami\`, and \`projects\`. \`npx edda-docs schema\` prints the CLI contract as JSON when you need the exact options.
 
 ## Workflow
 
@@ -52,7 +52,7 @@ Done when \`validate\` reports no errors, \`push\` reports \`Published\`, and St
 ### Step 1: Scaffold a new docs site
 
 \`\`\`bash
-npx @blode/edda new [directory] --slug <project-slug> --template <minimal|starter> -y
+npx edda-docs new [directory] --slug <project-slug> --template <minimal|starter> -y
 \`\`\`
 
 - \`minimal\` (default): \`docs.json\` and \`index.mdx\` only
@@ -63,7 +63,7 @@ Omit the directory to let the CLI prompt or default to \`docs/\`.
 ### Step 2: Validate the config
 
 \`\`\`bash
-npx @blode/edda validate [dir] --json
+npx edda-docs validate [dir] --json
 \`\`\`
 
 Checks \`docs.json\` against the schema and reports warnings. Run it before every push.
@@ -71,7 +71,7 @@ Checks \`docs.json\` against the schema and reports warnings. Run it before ever
 ### Step 3: Preview locally
 
 \`\`\`bash
-npx @blode/edda dev --dir <dir> --port 3030 --no-open
+npx edda-docs dev --dir <dir> --port 3030 --no-open
 \`\`\`
 
 Local Next.js dev server with hot reload.
@@ -79,7 +79,7 @@ Local Next.js dev server with hot reload.
 ### Step 4: Deploy
 
 \`\`\`bash
-npx @blode/edda push [dir] --project <slug> --json
+npx edda-docs push [dir] --project <slug> --json
 \`\`\`
 
 Uploads the docs directory and publishes it. The output names the deployment and manifest, not the site URL: the site is \`https://<slug>.blode.md\`, the project's custom domain, or \`seo.siteUrl\` from \`docs.json\` when the docs are proxied under another host.

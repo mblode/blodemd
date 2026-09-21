@@ -30,7 +30,7 @@ Sign in with GitHub and push. You do not run Docusaurus, a search index, or a cu
 
 ```bash
 # install the CLI
-npm i -g @blode/edda
+npm i -g edda-docs
 
 # browser sign-in with GitHub
 edda login

@@ -1,6 +1,6 @@
 # Edda Repository Guidelines
 
-User-facing product name is **Edda**. Public marketing home is **https://blode.co/edda**. The published CLI is **`@blode/edda`** (bin `edda`; `blodemd` remains a compatibility alias). Do not write Blode.md, BlodeMD, or blodemd in UI or copy.
+User-facing product name is **Edda**. Public marketing home is **https://blode.co/edda**. The published CLI is **`edda-docs`** (bin `edda`; `blodemd` remains a compatibility alias). Do not write Blode.md, BlodeMD, or blodemd in UI or copy.
 
 ## Project Structure
 

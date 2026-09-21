@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - run: npx @blode/edda@latest push --project your-project-slug
+      - run: npx edda-docs@latest push --project your-project-slug
         env:
           BLODEMD_API_KEY: ${{ secrets.BLODEMD_API_KEY }}
 ```
@@ -43,7 +43,7 @@ Store the key as a repository secret named `BLODEMD_API_KEY`. See [Getting a dep
 The same command works on any CI provider:
 
 1. Add your deploy key as a secret named `BLODEMD_API_KEY`.
-2. Run `npx @blode/edda@latest push --project <slug>` in your deploy step.
+2. Run `npx edda-docs@latest push --project <slug>` in your deploy step.
 
 If you prefer to pass the key inline instead of the environment variable, use the `--api-key <token>` flag.
 

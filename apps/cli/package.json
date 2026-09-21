@@ -1,5 +1,5 @@
 {
-  "name": "@blode/edda",
+  "name": "edda-docs",
   "version": "0.2.2",
   "description": "Edda CLI: git-native docs, published on merge",
   "repository": {

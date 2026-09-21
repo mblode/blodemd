@@ -7,8 +7,8 @@
 Write your docs as MDX files next to your code, then push them live with one command.
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@blode/edda">
-    <img src="https://img.shields.io/npm/v/@blode/edda?style=flat&colorA=000000&colorB=000000" />
+  <a href="https://www.npmjs.com/package/edda-docs">
+    <img src="https://img.shields.io/npm/v/edda-docs?style=flat&colorA=000000&colorB=000000" />
   </a>
   <a href="https://github.com/mblode/blodemd/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/mblode/blodemd?style=flat&colorA=000000&colorB=000000" />
@@ -30,7 +30,7 @@ Every docs site on the platform is built this way, including [captain.blode.md](
 ## Install
 
 ```bash
-npm install -g @blode/edda
+npm install -g edda-docs
 ```
 
 ## Quickstart

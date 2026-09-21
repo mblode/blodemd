@@ -50,7 +50,7 @@ const introJsonLd = pageJsonLd(
   ])
 );
 
-const installSnippet = `npm i -g @blode/edda
+const installSnippet = `npm i -g edda-docs
 edda login
 edda new docs
 edda push docs`;

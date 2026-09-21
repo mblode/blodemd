@@ -1,7 +1,7 @@
 {
-  "name": "@blode/edda-dev",
+  "name": "edda-docs-dev",
   "version": "0.2.2",
-  "description": "Edda dev server runtime (companion package for @blode/edda)",
+  "description": "Edda dev server runtime (companion package for edda-docs)",
   "repository": {
     "type": "git",
     "url": "https://github.com/mblode/blodemd"

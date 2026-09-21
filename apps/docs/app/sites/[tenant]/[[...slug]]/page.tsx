@@ -197,7 +197,7 @@ const CachedDocPage = async ({
       return notFound();
     }
 
-    const pushCommands = "edda login\nblodemd push";
+    const pushCommands = "edda login\nedda push";
     const docsPath = shell.tenant.docsPath ?? "";
 
     return (
