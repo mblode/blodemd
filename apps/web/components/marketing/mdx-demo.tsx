@@ -6,9 +6,13 @@ const paneLabel = "font-mono text-muted-foreground text-xs";
  * The signature moment: edit MDX on the left, see the published HTML and the
  * agent Markdown on the right. Server-rendered with the example's real output;
  * `public/landing.js` makes the editor live.
+ *
+ * The preview renders MDX `#` to `###` as h3 to h5, so the demo carries its own
+ * visually hidden h2. Without it the outline jumps from the hero h1 to h3.
  */
 export const MdxDemo = () => (
   <div className="container" data-mdx-demo>
+    <h2 className="sr-only">Live example: MDX in, HTML and Markdown out</h2>
     <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl border border-border bg-background text-left lg:grid-cols-2">
       <div className="flex min-w-0 flex-col border-border border-b bg-surface lg:border-r lg:border-b-0">
         <div className="flex min-h-12 items-center justify-between gap-4 border-border border-b px-4">
