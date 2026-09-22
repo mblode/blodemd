@@ -243,6 +243,7 @@ export default function HomePage() {
 
       <section
         aria-labelledby="new-reader-title"
+        data-section="agent-reader"
         className="border-border border-t py-24 text-center md:py-32"
       >
         <div className="container" data-reveal>
@@ -274,7 +275,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-border border-t py-24 text-center md:py-32">
+      <section
+        className="border-border border-t py-24 text-center md:py-32"
+        data-section="agents-draft"
+      >
         <div className="container" data-reveal>
           <h2 className="h-display text-balance font-semibold text-3xl md:text-5xl">
             Agents draft. People merge.
@@ -291,6 +295,7 @@ export default function HomePage() {
       <section
         aria-labelledby="how-it-works-title"
         className="scroll-mt-24 border-border border-t py-24 md:py-32"
+        data-section="how-it-works"
         id="how-it-works"
       >
         <div className="container">
@@ -307,6 +312,7 @@ export default function HomePage() {
       <section
         aria-labelledby="pricing"
         className="border-border border-t py-24 md:py-32"
+        data-section="pricing"
       >
         <div className="container">
           <h2
@@ -359,6 +365,7 @@ export default function HomePage() {
       <section
         aria-labelledby="faq-title"
         className="scroll-mt-24 border-border border-t py-24 md:py-32"
+        data-section="faq"
         id="faq"
       >
         <div className="container grid gap-12 md:grid-cols-[1fr_1.6fr] md:items-start">
@@ -382,6 +389,7 @@ export default function HomePage() {
         action={<PrimaryCta location="home_close" />}
         command={<InstallCommand commands={INSTALL_COMMANDS} />}
         description="Give it docs it can navigate, from the commit you merged."
+        section="cta-close"
         title="Your next reader is an agent."
       />
     </MarketingShell>

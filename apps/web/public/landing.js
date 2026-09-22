@@ -399,6 +399,53 @@ const eddaInitReveals = () => {
   }
 };
 
+// section_viewed {site, section} once per section per page view, the first
+// time half of it (or half the viewport, for a tall section) is on screen.
+// Skips the hero and anything already in view on load. Mirrors
+// trackSectionViews in lib/analytics.ts.
+const eddaInitSectionViews = () => {
+  try {
+    if (!("IntersectionObserver" in window)) {
+      return;
+    }
+    const seen = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          try {
+            const id = entry.target.dataset.section;
+            const viewport = entry.rootBounds
+              ? entry.rootBounds.height
+              : window.innerHeight;
+            const visible =
+              entry.intersectionRatio >= 0.5 ||
+              entry.intersectionRect.height >= viewport * 0.5;
+            if (!(id && entry.isIntersecting && visible) || seen.has(id)) {
+              continue;
+            }
+            seen.add(id);
+            observer.unobserve(entry.target);
+            eddaTrack("section_viewed", { section: id });
+          } catch {
+            // One bad entry must not stop the others.
+          }
+        }
+      },
+      { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5] }
+    );
+    for (const section of document.querySelectorAll("[data-section]")) {
+      const id = section.dataset.section;
+      const rect = section.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight && rect.bottom > 0;
+      if (id && id !== "hero" && !inView) {
+        observer.observe(section);
+      }
+    }
+  } catch {
+    // Analytics must not break the page.
+  }
+};
+
 const eddaCopy = async (button) => {
   const scope = button.closest("[data-copy-scope]") || button.parentElement;
   const status = scope.querySelector("[data-copy-status]");
@@ -454,4 +501,5 @@ if (typeof document !== "undefined" && typeof window !== "undefined") {
     eddaInitDemo(root);
   }
   eddaInitReveals();
+  eddaInitSectionViews();
 }
