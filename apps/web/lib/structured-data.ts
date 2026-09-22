@@ -22,6 +22,8 @@ const LOGO_URL = platformUrl("/web-app-manifest-512x512.png");
 
 export interface FaqItem {
   answer: string;
+  /** Further reading shown under the answer. Not part of the JSON-LD answer. */
+  links?: readonly { href: string; label: string }[];
   question: string;
 }
 

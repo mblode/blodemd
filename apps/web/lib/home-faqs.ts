@@ -4,37 +4,48 @@ import type { FaqItem } from "@/lib/structured-data";
  * Home FAQ. Each answer opens with the direct answer in 60 words or fewer.
  * The visible FAQ, the FAQPage JSON-LD and the Markdown mirror
  * (`app/markdown/content/home.md`) all come from or are checked against this
- * array.
+ * array. `links` render under the answer and stay out of the JSON-LD text.
  */
 export const HOME_FAQS: readonly FaqItem[] = [
   {
     answer:
-      "Edda is a docs platform for MDX kept in git. You write pages in your repo, review them in a pull request, and the merge publishes an HTML site plus llms.txt, llms-full.txt and a Markdown copy of every page. Hosted is $0 and the source is MIT.",
+      "Edda is a docs platform for teams that keep MDX in git. Every merge publishes an HTML site for people and, for agents, llms.txt, a Markdown copy of every page and WebMCP tools. Hosting is $0 and the source is MIT.",
     question: "What is Edda?",
   },
   {
     answer:
-      "Mintlify Starter is also $0, and it adds a web editor that commits back to your repo, plus a marketplace. Edda has neither, so writing and review stay in git. Edda does not claim drop-in compatibility with every Mintlify config key, so a Mintlify docs.json may need changes.",
-    question: "How is this different from Mintlify?",
+      "Edda is the git path without the web editor or marketplace: the same MDX files, a smaller docs.json and one command to publish. Hosted Edda is $0, and you can self-host the MIT source. Moving over takes a docs.json rewrite, not a content rewrite.",
+    links: [
+      {
+        href: "/docs/guides/migrate-from-mintlify",
+        label: "Migrate from Mintlify",
+      },
+    ],
+    question: "How is Edda different from Mintlify?",
   },
   {
     answer:
-      "Every deploy writes llms.txt, llms-full.txt and a .md copy of each page from the same MDX as the HTML, and each .md page links back to llms.txt. In Mintlify's 2026 benchmark, Markdown with that link averaged 0.11 failed requests per task, against 2.23 for HTML.",
-    question: "What do agents get?",
+      "llms.txt and llms-full.txt, a .md twin of every page (also served for Accept: text/markdown), discovery headers on every HTML page, a generated agent skill, and five WebMCP tools for browser agents. All of it is rebuilt from the commit you merged.",
+    question: "What do agents get from an Edda site?",
+  },
+  {
+    answer:
+      "An agent can draft the change as a pull request like any other code change. Edda publishes what you merge, so a person stays the approver. Edda doesn't include a writing agent of its own.",
+    question: "Can an AI agent write my docs?",
+  },
+  {
+    answer:
+      "Not in Edda yet. Agents fetch server-side and run no JavaScript, so PostHog counts people only. To count agents today, put a proxy you can log in front of the docs and count .md, llms.txt and AI user-agent requests.",
+    links: [
+      { href: "/docs/guides/proxy-vercel", label: "Proxy with Vercel" },
+      { href: "/docs/guides/proxy-cloudflare", label: "Proxy with Cloudflare" },
+      { href: "/docs/guides/proxy-nginx", label: "Proxy with Nginx" },
+    ],
+    question: "Can I see how much agent traffic my docs get?",
   },
   {
     answer:
       "Hosted Edda is $0 with unlimited projects, pages and seats, including custom domains, search, MDX and API references. You do not get a visual editor, a plugin marketplace, SOC 2, SSO or an SLA, and support is the founder. The CLI and renderer are MIT if you self-host.",
-    question: "How much does Edda cost?",
-  },
-  {
-    answer:
-      "Yes. Point a custom domain at your Edda site, or proxy /docs through the site you already run. The proxy guides have configs for Vercel, Cloudflare, Nginx and Caddy.",
-    question: "Can I use my own domain?",
-  },
-  {
-    answer:
-      "Matthew Blode builds Edda. For support, email m@blode.co or open an issue at github.com/mblode/edda.",
-    question: "Who builds Edda and how do I get support?",
+    question: "What does Edda cost?",
   },
 ];

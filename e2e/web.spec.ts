@@ -6,7 +6,7 @@ test("landing page renders primary CTA", async ({ page }) => {
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "MDX docs, published on merge",
+      name: "Docs agents can navigate",
     })
   ).toBeVisible();
 
@@ -20,8 +20,11 @@ test("landing page renders primary CTA", async ({ page }) => {
     page.getByRole("heading", { name: "The merge is the deploy" })
   ).toBeVisible();
   await expect(
-    page.getByText("No second editor. On purpose.").first()
+    page.getByRole("heading", { name: "Agents draft. People merge." })
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Mintlify, 2026 State of Knowledge Report" })
+  ).toHaveAttribute("href", "https://www.mintlify.com/state-of-knowledge/2026");
 });
 
 test("landing MDX demo renders edits as HTML and agent Markdown", async ({
@@ -35,6 +38,6 @@ test("landing MDX demo renders edits as HTML and agent Markdown", async ({
     page.locator("[data-mdx-preview] h3", { hasText: "Hello" })
   ).toBeVisible();
   await expect(page.locator("[data-mdx-output]")).toHaveText(
-    "# Hello\n\n> [!TIP]\n> Ship it."
+    "> ## Documentation Index\n> [HTML page](https://acme.blode.md/quickstart)\n> [Documentation index](https://acme.blode.md/llms.txt)\n> Use the index to discover all available pages before exploring further.\n\n# Hello\n\n> [!TIP]\n> Ship it."
   );
 });

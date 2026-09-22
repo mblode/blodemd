@@ -6,7 +6,12 @@ import { createContext, runInContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 
 import { LANDING_EVENTS } from "./analytics";
-import { DEMO_HTML, DEMO_MARKDOWN, DEMO_SOURCE } from "./mdx-demo";
+import {
+  DEMO_HTML,
+  DEMO_INDEX_QUOTE,
+  DEMO_MARKDOWN,
+  DEMO_SOURCE,
+} from "./mdx-demo";
 
 interface RenderResult {
   error: string | null;
@@ -38,6 +43,12 @@ describe("landing MDX demo", () => {
     expect(result.markdown).toBe(DEMO_MARKDOWN);
   });
 
+  it("opens the Markdown pane with the same index blockquote", () => {
+    expect(runInContext("EDDA_INDEX_QUOTE", context)).toBe(DEMO_INDEX_QUOTE);
+    expect(DEMO_MARKDOWN.startsWith(`${DEMO_INDEX_QUOTE}\n\n# `)).toBe(true);
+    expect(render("").markdown).toBe(DEMO_INDEX_QUOTE);
+  });
+
   it("escapes raw HTML and drops unsafe link protocols", () => {
     const result = render(
       `<script>alert(1)</script>\n\n[x](${SCRIPT_PROTOCOL}alert(1)) <img src=x onerror=alert(1)>`
@@ -63,7 +74,7 @@ describe("landing MDX demo", () => {
       '<Callout type="warning" title="Heads up">\nCheck the domain.\n</Callout>'
     );
     expect(result.markdown).toBe(
-      "> [!WARNING]\n> **Heads up**\n>\n> Check the domain."
+      `${DEMO_INDEX_QUOTE}\n\n> [!WARNING]\n> **Heads up**\n>\n> Check the domain.`
     );
     expect(result.html).toContain('data-type="warning"');
   });

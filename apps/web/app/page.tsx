@@ -15,20 +15,17 @@ import { MarketingShell } from "@/components/ui/marketing-shell";
 import { siteConfig } from "@/lib/config";
 import { HOME_FAQS } from "@/lib/home-faqs";
 import {
-  GITHUB_REPO,
-  getGithubStars,
-  getNpmWeeklyDownloads,
-  NPM_PACKAGE,
-} from "@/lib/live-stats";
-import {
   HOME_DESCRIPTION,
+  HOME_EYEBROW,
   HOME_HEADLINE,
   HOME_SUBHEAD,
   HOME_TITLE,
+  KNOWLEDGE_REPORT_URL,
   MARKETING_HOME,
   marketingUrl,
   pageMetadata,
 } from "@/lib/marketing-site";
+import { DEMO_INDEX_QUOTE } from "@/lib/mdx-demo";
 import {
   pageJsonLd,
   SOFTWARE_ID,
@@ -62,7 +59,6 @@ const homeJsonLd = pageJsonLd(
     description: HOME_DESCRIPTION,
     extra: {
       about: { "@id": SOFTWARE_ID },
-      breadcrumb: { "@id": `${marketingUrl("/")}#breadcrumb` },
       dateModified: HOME_UPDATED_AT,
       mainEntity: { "@id": `${marketingUrl("/")}#faq` },
     },
@@ -73,32 +69,26 @@ const homeJsonLd = pageJsonLd(
     description: HOME_SUBHEAD,
     offerUrl: `${MARKETING_HOME}#pricing`,
   }),
-  faqJsonLd(HOME_FAQS),
-  {
-    "@id": `${marketingUrl("/")}#breadcrumb`,
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        item: "https://blode.co",
-        name: "Matthew Blode",
-        position: 1,
-      },
-      {
-        "@type": "ListItem",
-        item: "https://blode.co/projects",
-        name: "Projects",
-        position: 2,
-      },
-      {
-        "@type": "ListItem",
-        item: marketingUrl("/"),
-        name: "Edda",
-        position: 3,
-      },
-    ],
-  }
+  faqJsonLd(HOME_FAQS)
 );
+
+/** Mintlify's figures, quoted as the report gives them. Add no others. */
+const READER_STATS = [
+  {
+    label:
+      "agent requests vs 131M human page loads, across Mintlify-hosted docs in August 2026",
+    value: "257M",
+  },
+  {
+    label: "of agent traffic came through .md pages, llms.txt or agent skills",
+    value: "83%",
+  },
+  {
+    label:
+      "failed requests per task when Markdown links to an index, vs 2.23 for HTML",
+    value: "0.11",
+  },
+] as const;
 
 /**
  * blode.co/edda serves this page as HTML without React, so the CTA is a plain
@@ -120,33 +110,6 @@ const PrimaryCta = ({
       {CTA_LABEL}
     </a>
   </Button>
-);
-
-const Breadcrumb = () => (
-  <nav aria-label="Breadcrumb" className="text-muted-foreground text-sm">
-    <ol className="flex flex-wrap justify-center gap-2">
-      <li>
-        <a
-          className="underline-offset-4 hover:underline"
-          href="https://blode.co"
-          rel="author"
-        >
-          Matthew Blode
-        </a>
-      </li>
-      <li aria-hidden="true">/</li>
-      <li>
-        <a
-          className="underline-offset-4 hover:underline"
-          href="https://blode.co/projects"
-        >
-          Projects
-        </a>
-      </li>
-      <li aria-hidden="true">/</li>
-      <li aria-current="page">Edda</li>
-    </ol>
-  </nav>
 );
 
 const CodeMedia = ({ caption, code }: { caption: string; code: string }) => (
@@ -181,29 +144,43 @@ const DiffMedia = () => (
   </figure>
 );
 
+const textLink =
+  "rounded-sm underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 const features: { description: string; media: ReactNode; title: string }[] = [
   {
     description:
-      "Pages are MDX files in your repo, next to the code they describe, with docs.json for navigation. Write them in the editor you already use.",
+      "Each page has a .md twin that opens with a link to llms.txt, so an agent that lands on one page can find the rest instead of guessing URLs.",
     media: (
       <CodeMedia
-        caption="your-repo/"
-        code={
-          "docs/\n  docs.json\n  index.mdx\n  quickstart.mdx\nsrc/\npackage.json"
-        }
+        caption="acme.blode.md/quickstart.md"
+        code={`${DEMO_INDEX_QUOTE}\n\n# Quickstart`}
       />
     ),
-    title: "Docs live in your repo",
+    title: "Indexed Markdown on every page",
   },
   {
     description:
-      "A docs change is a diff. Your team reviews it in the same pull request as the code, with the same comments and approvals.",
+      "Every page registers five WebMCP tools (search_docs, read_page, get_site_overview, read_skill, navigate_page), so an agent driving a browser tab reads your docs through typed calls.",
+    media: (
+      <CodeMedia
+        caption="document.modelContext.getTools()"
+        code={
+          "search_docs\nread_page\nget_site_overview\nread_skill\nnavigate_page"
+        }
+      />
+    ),
+    title: "Tools for browser agents",
+  },
+  {
+    description:
+      "Whether a person or an agent wrote it, a docs change is a diff your team approves beside the code it describes.",
     media: <DiffMedia />,
     title: "Review in the pull request",
   },
   {
     description:
-      "Install the GitHub App and a push to main deploys the site. From a terminal, edda push docs does the same.",
+      "The GitHub App deploys on every push to main, so the docs change ships the day the product does.",
     media: (
       <CodeMedia
         caption="With the GitHub App"
@@ -213,19 +190,6 @@ const features: { description: string; media: ReactNode; title: string }[] = [
       />
     ),
     title: "Publish on merge",
-  },
-  {
-    description:
-      "Each deploy writes llms.txt, llms-full.txt and a .md copy of every page from the MDX you merged, so agents read the same version people do.",
-    media: (
-      <CodeMedia
-        caption="Written on every deploy"
-        code={
-          "acme.blode.md/llms.txt\nacme.blode.md/llms-full.txt\nacme.blode.md/quickstart.md"
-        }
-      />
-    ),
-    title: "Markdown for agents",
   },
   {
     description:
@@ -242,12 +206,7 @@ const features: { description: string; media: ReactNode; title: string }[] = [
   },
 ];
 
-export default async function HomePage() {
-  const [stars, downloads] = await Promise.all([
-    getGithubStars(),
-    getNpmWeeklyDownloads(),
-  ]);
-
+export default function HomePage() {
   return (
     <MarketingShell staticLanding>
       <JsonLd data={homeJsonLd} />
@@ -256,29 +215,75 @@ export default async function HomePage() {
       <MarketingHero
         action={<PrimaryCta location="home_hero" />}
         description={HOME_SUBHEAD}
-        eyebrow={<Breadcrumb />}
+        eyebrow={
+          <p className="text-muted-foreground text-sm">{HOME_EYEBROW}</p>
+        }
         secondary={
-          <Link
-            className="rounded-sm text-sm underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            data-cta-location="home_hero_secondary"
-            href="/docs"
-          >
-            Read the docs
-          </Link>
+          <>
+            <Link
+              className={`${textLink} text-sm`}
+              data-cta-location="home_hero_secondary"
+              href="/docs"
+            >
+              Read the docs
+            </Link>
+            <Link
+              className={`${textLink} text-sm`}
+              data-cta-location="home_hero_migrate"
+              href="/docs/guides/migrate-from-mintlify"
+            >
+              Moving from Mintlify?
+            </Link>
+          </>
         }
         title={HOME_HEADLINE}
       >
         <MdxDemo />
       </MarketingHero>
 
-      <section className="container pb-24 text-center md:pb-32">
-        <div data-reveal>
+      <section
+        aria-labelledby="new-reader-title"
+        className="border-border border-t py-24 text-center md:py-32"
+      >
+        <div className="container" data-reveal>
+          <h2
+            className="h-title mx-auto max-w-3xl text-balance font-semibold text-3xl md:text-5xl"
+            id="new-reader-title"
+          >
+            Your majority reader is an agent
+          </h2>
+          <div className="mt-12 md:mt-16">
+            <ProofStats stats={READER_STATS} />
+          </div>
+          <p className="mt-10 text-muted-foreground text-sm">
+            Source:{" "}
+            <a
+              className={textLink}
+              href={KNOWLEDGE_REPORT_URL}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Mintlify, 2026 State of Knowledge Report
+            </a>
+            .
+          </p>
+          <p className="measure mx-auto mt-8 text-balance md:text-lg">
+            Edda ships all three routes on every deploy, and every Markdown page
+            links to the index before its first heading.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-border border-t py-24 text-center md:py-32">
+        <div className="container" data-reveal>
           <h2 className="h-display text-balance font-semibold text-3xl md:text-5xl">
-            No second editor. On purpose.
+            Agents draft. People merge.
           </h2>
           <p className="measure mx-auto mt-6 text-balance text-muted-foreground md:text-lg">
-            Edda has no web editor and no plugin marketplace. Your editor, your
-            repo, your pull request. If you want a CMS, this is the wrong tool.
+            Most teams now have agents drafting docs changes, and most still
+            want a person to approve them. In Edda that approval is the pull
+            request you already review, and merging it is the publish. No second
+            editor, no sync job, no docs that lag the release.
           </p>
         </div>
       </section>
@@ -298,30 +303,6 @@ export default async function HomePage() {
           <FeatureRows items={features} />
         </div>
       </section>
-
-      {stars === null && downloads === null ? null : (
-        <section
-          aria-label="Live numbers"
-          className="border-border border-t py-16 md:py-20"
-        >
-          <div className="container" data-reveal>
-            <ProofStats
-              stats={[
-                {
-                  href: `https://github.com/${GITHUB_REPO}`,
-                  label: "GitHub stars",
-                  value: stars,
-                },
-                {
-                  href: `https://www.npmjs.com/package/${NPM_PACKAGE}`,
-                  label: `${NPM_PACKAGE} downloads, last 7 days`,
-                  value: downloads,
-                },
-              ]}
-            />
-          </div>
-        </section>
-      )}
 
       <section
         aria-labelledby="pricing"
@@ -400,8 +381,8 @@ export default async function HomePage() {
       <CtaClose
         action={<PrimaryCta location="home_close" />}
         command={<InstallCommand commands={INSTALL_COMMANDS} />}
-        description="Or install the CLI and publish from your terminal."
-        title="The answer they read matches the commit you merged."
+        description="Give it docs it can navigate, from the commit you merged."
+        title="Your next reader is an agent."
       />
     </MarketingShell>
   );

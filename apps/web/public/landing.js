@@ -25,6 +25,11 @@ const EDDA_CALLOUTS = {
 
 const EDDA_MAX_SOURCE = 4000;
 
+// The index blockquote the real .md route prepends to every page, for the
+// demo's page. Mirrors DEMO_INDEX_QUOTE in lib/mdx-demo.ts.
+const EDDA_INDEX_QUOTE =
+  "> ## Documentation Index\n> [HTML page](https://acme.blode.md/quickstart)\n> [Documentation index](https://acme.blode.md/llms.txt)\n> Use the index to discover all available pages before exploring further.";
+
 // Private-use code points mark protected spans. The input is stripped of them.
 const EDDA_MARK = "";
 const EDDA_MARKS = //gu;
@@ -298,7 +303,9 @@ const eddaRenderMdx = (input) => {
   if (unknown && !state.error) {
     state.error = `<${unknown}> is not in this demo. Try Note, Tip, Warning or Info.`;
   }
-  return { error: state.error, html, markdown: eddaAgentMarkdown(source) };
+  const body = eddaAgentMarkdown(source);
+  const markdown = body ? `${EDDA_INDEX_QUOTE}\n\n${body}` : EDDA_INDEX_QUOTE;
+  return { error: state.error, html, markdown };
 };
 
 // ---------------------------------------------------------------------------
@@ -336,7 +343,7 @@ const eddaInitDemo = (root) => {
     preview.innerHTML =
       result.html ||
       '<p class="mdx-demo-empty">Type some MDX to see the page.</p>';
-    output.textContent = result.markdown || "(empty)";
+    output.textContent = result.markdown;
     status.textContent = result.error || "";
     root.toggleAttribute("data-error", Boolean(result.error));
   };

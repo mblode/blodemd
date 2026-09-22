@@ -24,6 +24,20 @@ export const Faq = ({ items }: FaqProps) => (
           </span>
         </summary>
         <p className="measure pb-6 text-muted-foreground">{item.answer}</p>
+        {item.links ? (
+          <ul className="-mt-2 flex flex-wrap gap-x-6 gap-y-2 pb-6 text-sm">
+            {item.links.map((link) => (
+              <li key={link.href}>
+                <a
+                  className="rounded-sm underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  href={link.href}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </details>
     ))}
   </div>

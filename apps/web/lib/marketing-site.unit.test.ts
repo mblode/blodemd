@@ -104,11 +104,11 @@ describe("Designer-locked product one-liner", () => {
 });
 
 describe("home page copy", () => {
-  it("keeps the H1 to 3 to 6 words with the intent keyword", () => {
+  it("keeps the H1 to 3 to 6 words and the query in the title", () => {
     const words = HOME_HEADLINE.split(/\s+/);
     expect(words.length).toBeGreaterThanOrEqual(3);
     expect(words.length).toBeLessThanOrEqual(6);
-    expect(HOME_HEADLINE).toContain("MDX docs");
+    expect(HOME_TITLE).toBe("Docs for AI agents, published on merge | Edda");
   });
 
   it("keeps the subhead to one sentence with no em dashes", () => {

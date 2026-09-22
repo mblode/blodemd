@@ -28,19 +28,29 @@ export const SITE_NAME = "Edda";
 // oxfmt-ignore
 export const PRODUCT_ONE_LINER = "Knowledge docs for agents. Git-native MDX. Publish on merge.";
 
-/** Home H1. Carries the intent keyword ("MDX docs"); the brand is in the header. */
-export const HOME_HEADLINE = "MDX docs, published on merge";
+/** Home eyebrow above the H1. The brand plus the one-liner's category. */
+export const HOME_EYEBROW = "Edda, knowledge docs for agents";
 
-/** Home subhead: who it is for and what changes, in one sentence. */
+/** Home H1: the promise. The search query lives in HOME_TITLE. */
+export const HOME_HEADLINE = "Docs agents can navigate";
+
+/** Home subhead: why it matters and what changes, in one sentence. */
 export const HOME_SUBHEAD =
-  "For teams that keep docs in git, every merge publishes the HTML site and agent-readable Markdown from the same commit.";
+  "Agents now read more docs than people do, so every merge publishes HTML for people and indexed Markdown for agents from the same commit.";
 
 /** Home `<title>`: the query first, then the brand. */
-export const HOME_TITLE = `${HOME_HEADLINE} | ${SITE_NAME}`;
+export const HOME_TITLE = `Docs for AI agents, published on merge | ${SITE_NAME}`;
 
 /** Default meta description. */
 export const HOME_DESCRIPTION =
-  "Edda publishes MDX docs from your git repo. Review in the pull request, and the merge ships HTML plus llms.txt and Markdown for agents. Hosted is $0, MIT to self-host.";
+  "Git-native MDX docs. Every merge publishes HTML for people and indexed Markdown, llms.txt and WebMCP tools for agents. $0 hosted, MIT source.";
+
+/**
+ * Mintlify's 2026 State of Knowledge Report, the source of every agent
+ * readership figure on the home page. Each figure is cited next to a link here.
+ */
+export const KNOWLEDGE_REPORT_URL =
+  "https://www.mintlify.com/state-of-knowledge/2026";
 
 /** Inner pages set a bare title and the root layout appends the product. */
 export const TITLE_TEMPLATE = `%s | ${SITE_NAME}`;
