@@ -21,12 +21,26 @@ export const PLATFORM_ORIGIN = "https://blode.md";
 
 export const SITE_NAME = "Edda";
 
-/** Designer lock. Keep character-for-character with the README hero. */
+/**
+ * Product one-liner. Designer lock: keep character-for-character with the
+ * README hero and the CLI description. The home page H1 is HOME_HEADLINE.
+ */
 // oxfmt-ignore
-export const HOME_TITLE = "Knowledge docs for agents. Git-native MDX. Publish on merge.";
+export const PRODUCT_ONE_LINER = "Knowledge docs for agents. Git-native MDX. Publish on merge.";
 
-/** Default meta description. Lock first, how second. */
-export const HOME_DESCRIPTION = `${HOME_TITLE} Write MDX in git. The merge publishes the site and the Markdown from that commit. Hosted is $0. MIT if I disappear.`;
+/** Home H1. Carries the intent keyword ("MDX docs"); the brand is in the header. */
+export const HOME_HEADLINE = "MDX docs, published on merge";
+
+/** Home subhead: who it is for and what changes, in one sentence. */
+export const HOME_SUBHEAD =
+  "For teams that keep docs in git, every merge publishes the HTML site and agent-readable Markdown from the same commit.";
+
+/** Home `<title>`: the query first, then the brand. */
+export const HOME_TITLE = `${HOME_HEADLINE} | ${SITE_NAME}`;
+
+/** Default meta description. */
+export const HOME_DESCRIPTION =
+  "Edda publishes MDX docs from your git repo. Review in the pull request, and the merge ships HTML plus llms.txt and Markdown for agents. Hosted is $0, MIT to self-host.";
 
 /** Inner pages set a bare title and the root layout appends the product. */
 export const TITLE_TEMPLATE = `%s | ${SITE_NAME}`;

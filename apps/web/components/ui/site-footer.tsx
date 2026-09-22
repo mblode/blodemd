@@ -30,7 +30,6 @@ const renderLink = ({
 const landingHref = (href: string) =>
   ({
     "/pricing": "#pricing",
-    "/about": "#about",
     "/docs-as-code": "#how-it-works",
     "/compare/mintlify": "#faq",
   })[href] ?? href;

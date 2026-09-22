@@ -1,15 +1,13 @@
 const MARKETING_MARKDOWN: Record<string, string> = {
-  "/": `# Edda
+  "/": `# MDX docs, published on merge
 
-Knowledge docs for agents. Git-native MDX. Publish on merge.
+For teams that keep docs in git, every merge publishes the HTML site and agent-readable Markdown from the same commit.
 
-Hosted is $0. MIT if I disappear.
+Edda. Hosted is $0. The CLI and renderer are MIT.
 
 ## No second editor. On purpose.
 
-Git-native docs hosts added a web editor that commits back to the repo, plus a marketplace. If you want a CMS, this is the wrong tool.
-
-Write MDX in the repo. The pull request is the review. The merge publishes the site.
+Edda has no web editor and no plugin marketplace. Your editor, your repo, your pull request. If you want a CMS, this is the wrong tool.
 
 ## What's inside
 

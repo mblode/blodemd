@@ -152,3 +152,36 @@ export const breadcrumbNode = (
     position: index + 1,
   })),
 });
+
+export const SOFTWARE_ID = `${MARKETING_HOME}/#software`;
+
+/**
+ * The product itself, with the hosted `$0` offer. Every property here has to
+ * be visible on the page that emits it: the price and MIT licence sit in the
+ * pricing section, the description in the hero.
+ */
+export const softwareApplicationNode = ({
+  description,
+  offerUrl,
+}: {
+  description: string;
+  /** Absolute URL of the visible pricing section. */
+  offerUrl: string;
+}): SchemaNode => ({
+  "@id": SOFTWARE_ID,
+  "@type": "SoftwareApplication",
+  applicationCategory: "DeveloperApplication",
+  description,
+  isAccessibleForFree: true,
+  license: "https://opensource.org/licenses/MIT",
+  name: SITE_NAME,
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    url: offerUrl,
+  },
+  operatingSystem: "Web",
+  publisher: { "@id": ORGANIZATION_ID },
+  url: MARKETING_HOME,
+});

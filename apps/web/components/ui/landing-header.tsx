@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/config";
 const links = [
   { href: "/docs", label: "Docs" },
   { href: "#pricing", label: "Pricing" },
-  { href: "#about", label: "About" },
+  { href: "/about", label: "About" },
   { href: siteConfig.links.github, label: "GitHub" },
 ];
 
@@ -41,6 +41,7 @@ export const LandingHeader = () => (
         </a>
         <a
           className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
+          data-cta-location="header"
           href="https://blode.md/oauth/consent"
         >
           Sign up

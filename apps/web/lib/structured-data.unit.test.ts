@@ -7,6 +7,8 @@ import {
   pageJsonLd,
   PERSON_ID,
   siteGraph,
+  SOFTWARE_ID,
+  softwareApplicationNode,
   WEBSITE_ID,
   webPageNode,
 } from "./structured-data";
@@ -58,5 +60,21 @@ describe("structured data graph", () => {
     expect(article.publisher).toEqual({ "@id": ORGANIZATION_ID });
     expect(article.author).toEqual({ "@id": PERSON_ID });
     expect(article.image).toContain("web-app-manifest-512x512.png");
+  });
+
+  it("prices the hosted product at $0 on a SoftwareApplication node", () => {
+    const node = softwareApplicationNode({
+      description: "MDX docs from git.",
+      offerUrl: "https://blode.co/edda#pricing",
+    });
+
+    expect(node["@id"]).toBe(SOFTWARE_ID);
+    expect(node["@type"]).toBe("SoftwareApplication");
+    expect(node.publisher).toEqual({ "@id": ORGANIZATION_ID });
+    expect(node.offers).toMatchObject({
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    });
   });
 });
