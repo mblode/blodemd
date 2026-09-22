@@ -1,17 +1,25 @@
 const MARKETING_MARKDOWN: Record<string, string> = {
-  "/": `# MDX docs, published on merge
+  "/": `# Docs agents can navigate
 
-For teams that keep docs in git, every merge publishes the HTML site and agent-readable Markdown from the same commit.
+Agents now read more docs than people do, so every merge publishes HTML for people and indexed Markdown for agents from the same commit.
 
-Edda. Hosted is $0. The CLI and renderer are MIT.
+Edda, knowledge docs for agents. Hosted is $0. The CLI and renderer are MIT.
 
-## No second editor. On purpose.
+## Your majority reader is an agent
 
-Edda has no web editor and no plugin marketplace. Your editor, your repo, your pull request. If you want a CMS, this is the wrong tool.
+- **257M** agent requests vs 131M human page loads, across Mintlify-hosted docs in August 2026
+- **83%** of agent traffic came through \`.md\` pages, \`llms.txt\` or agent skills
+- **0.11** failed requests per task when Markdown links to an index, vs 2.23 for HTML
 
-## What's inside
+Source: [Mintlify, 2026 State of Knowledge Report](https://www.mintlify.com/state-of-knowledge/2026).
 
-Sign in with GitHub and push. You do not run Docusaurus to get a public URL.
+Edda ships all three routes on every deploy, and every Markdown page links to the index before its first heading.
+
+## Agents draft. People merge.
+
+Most teams now have agents drafting docs changes, and most still want a person to approve them. In Edda that approval is the pull request you already review, and merging it is the publish. No second editor, no sync job, no docs that lag the release.
+
+## The merge is the deploy
 
 1. Install the GitHub app at github.com/apps/blodemd
 2. Pick a repo and a docs folder
@@ -30,6 +38,7 @@ edda push docs
 
 - **No second editor**: $0 hosted. Sign in with GitHub and push.
 - **Your Postgres**: MIT. Clone the repo and run the same CLI.
+- **Moving from Mintlify?** [Migrate from Mintlify](https://blode.co/edda/docs/guides/migrate-from-mintlify)
 
 ## Links
 
