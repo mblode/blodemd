@@ -20,7 +20,6 @@ const readCount = async (
   try {
     const response = await fetch(url, {
       headers: { accept: "application/json", ...headers },
-      next: { revalidate: REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     if (!response.ok) {

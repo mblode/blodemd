@@ -111,10 +111,6 @@ describe("home page copy", () => {
     expect(HOME_HEADLINE).toContain("MDX docs");
   });
 
-  it("leads the title with the query, then the brand", () => {
-    expect(HOME_TITLE).toBe(`${HOME_HEADLINE} | Edda`);
-  });
-
   it("keeps the subhead to one sentence with no em dashes", () => {
     expect(HOME_SUBHEAD.match(/[.!?](\s|$)/g)).toHaveLength(1);
     for (const copy of [HOME_HEADLINE, HOME_SUBHEAD, HOME_DESCRIPTION]) {

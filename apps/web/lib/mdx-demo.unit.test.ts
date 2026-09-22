@@ -47,6 +47,17 @@ describe("landing MDX demo", () => {
     expect(result.html).not.toContain(SCRIPT_PROTOCOL);
   });
 
+  it("drops backslash links that browsers read as protocol-relative", () => {
+    expect(render("[x](/\\evil.example)").html).toBe("<p>x</p>");
+  });
+
+  it("keeps emphasis and code markup out of link hrefs", () => {
+    expect(render("[a](https://x.example/_b_)").html).toBe(
+      '<p><a href="https://x.example/&#95;b&#95;" rel="nofollow noopener">a</a></p>'
+    );
+    expect(render("[a](https://x.example/`b`)").html).not.toContain("<a");
+  });
+
   it("turns callouts into the alert blocks agents read", () => {
     const result = render(
       '<Callout type="warning" title="Heads up">\nCheck the domain.\n</Callout>'

@@ -48,10 +48,17 @@ const eddaAttr = (attributes, name) => {
   return match[1] || match[2] || match[3] || null;
 };
 
+// `/\host` is protocol-relative to browsers, so a backslash after the leading
+// slash is as unsafe as a second slash.
 const eddaSafeHref = (url) => {
   const trimmed = url.trim();
-  return /^(?:https?:\/\/|\/(?!\/)|#)/iu.test(trimmed) ? trimmed : null;
+  return /^(?:https?:\/\/|\/(?![/\\])|#)/iu.test(trimmed) ? trimmed : null;
 };
+
+// `*` and `_` become entities so the emphasis passes cannot put tags inside
+// the href. The browser decodes them back to the same URL.
+const eddaHrefAttr = (href) =>
+  eddaEscape(href).replaceAll("*", "&#42;").replaceAll("_", "&#95;");
 
 const eddaInline = (text) => {
   const codes = [];
@@ -60,12 +67,16 @@ const eddaInline = (text) => {
     return `${EDDA_MARK}${codes.length - 1}${EDDA_MARK}`;
   });
   out = eddaEscape(out);
-  out = out.replaceAll(/\[([^\]]+)\]\(([^)\s]+)\)/gu, (_match, label, url) => {
+  out = out.replaceAll(/\[([^\]]+)\]\(([^)\s]+)\)/gu, (match, label, url) => {
+    // A code span inside the destination is not a link, as in CommonMark.
+    if (url.includes(EDDA_MARK)) {
+      return match;
+    }
     const href = eddaSafeHref(url.replaceAll("&amp;", "&"));
     if (!href) {
       return label;
     }
-    return `<a href="${eddaEscape(href)}" rel="nofollow noopener">${label}</a>`;
+    return `<a href="${eddaHrefAttr(href)}" rel="nofollow noopener">${label}</a>`;
   });
   out = out.replaceAll(/\*\*([^*\n]+)\*\*/gu, "<strong>$1</strong>");
   out = out.replaceAll(/\*([^*\n]+)\*/gu, "<em>$1</em>");
@@ -299,7 +310,13 @@ const eddaTrack = (event, properties) => {
   if (!client || typeof client.capture !== "function") {
     return;
   }
-  client.capture(event, { ...properties, site: "edda" });
+  // Analytics runs before the demo render and the copy in the same handlers,
+  // so a throwing third-party client must not take them down.
+  try {
+    client.capture(event, { ...properties, site: "edda" });
+  } catch {
+    // Dropping one event is the right outcome.
+  }
 };
 
 const eddaInitDemo = (root) => {

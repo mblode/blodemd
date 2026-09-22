@@ -1,11 +1,12 @@
 import { FileTextIcon } from "blode-icons-react";
 
 import { siteConfig } from "@/lib/config";
+import { platformUrl } from "@/lib/marketing-site";
 
 const links = [
   { href: "/docs", label: "Docs" },
   { href: "#pricing", label: "Pricing" },
-  { href: "/about", label: "About" },
+  { href: platformUrl("/about"), label: "About" },
   { href: siteConfig.links.github, label: "GitHub" },
 ];
 
