@@ -250,7 +250,7 @@ export default function HomePage() {
         data-section="agent-reader"
         className="border-border border-t py-24 text-center md:py-32"
       >
-        <div className="container" data-reveal>
+        <div className="container" data-reveal suppressHydrationWarning>
           <h2
             className="h-title mx-auto max-w-3xl text-balance font-semibold text-3xl md:text-5xl"
             id="new-reader-title"
@@ -283,7 +283,7 @@ export default function HomePage() {
         className="border-border border-t py-24 text-center md:py-32"
         data-section="agents-draft"
       >
-        <div className="container" data-reveal>
+        <div className="container" data-reveal suppressHydrationWarning>
           <h2 className="h-display text-balance font-semibold text-3xl md:text-5xl">
             Agents draft. People merge.
           </h2>

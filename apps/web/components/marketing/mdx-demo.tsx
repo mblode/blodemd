@@ -9,9 +9,12 @@ const paneLabel = "font-mono text-muted-foreground text-xs";
  *
  * The preview renders MDX `#` to `###` as h3 to h5, so the demo carries its own
  * visually hidden h2. Without it the outline jumps from the hero h1 to h3.
+ *
+ * `landing.js` runs before hydration and flips `data-ready`, `data-error`,
+ * `hidden` and `readOnly`, so those elements suppress the hydration warning.
  */
 export const MdxDemo = () => (
-  <div className="container" data-mdx-demo>
+  <div className="container" data-mdx-demo suppressHydrationWarning>
     <h2 className="sr-only">Live example: MDX in, HTML and Markdown out</h2>
     <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl border border-border bg-background text-left lg:grid-cols-2">
       <div className="flex min-w-0 flex-col border-border border-b bg-surface lg:border-r lg:border-b-0">
@@ -23,6 +26,7 @@ export const MdxDemo = () => (
             className="inline-flex h-8 items-center rounded-md px-2 text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             data-mdx-reset
             hidden
+            suppressHydrationWarning
             type="button"
           >
             Reset example
@@ -39,6 +43,7 @@ export const MdxDemo = () => (
           maxLength={4000}
           readOnly
           spellCheck={false}
+          suppressHydrationWarning
         />
       </div>
       <div className="flex min-w-0 flex-col">
