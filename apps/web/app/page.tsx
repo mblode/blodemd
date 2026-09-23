@@ -33,6 +33,10 @@ import {
   webPageNode,
 } from "@/lib/structured-data";
 
+// The landing route and the legal pages it links to must navigate instantly.
+// e2e/web-instant.spec.ts guards the same routes with @next/playwright.
+export const instant = true;
+
 export const metadata = pageMetadata({
   description: HOME_DESCRIPTION,
   path: "/",

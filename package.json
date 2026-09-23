@@ -29,6 +29,7 @@
     "test:smoke": "vitest run --project smoke",
     "pretest:e2e": "turbo build --filter=web --filter=docs --filter=dashboard",
     "test:e2e": "playwright test",
+    "test:instant": "E2E_APPS=web playwright test e2e/web-instant.spec.ts",
     "db:start": "npx supabase start",
     "db:stop": "npx supabase stop",
     "db:push": "npm run db:local:push --workspace=packages/db",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
+    "@next/playwright": "^16.3.6",
     "@playwright/test": "^1.63.0",
     "@testing-library/jest-dom": "^7.0.1",
     "jsdom": "^30.1.1",
