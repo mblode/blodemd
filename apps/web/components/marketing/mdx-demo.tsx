@@ -23,7 +23,7 @@ export const MdxDemo = () => (
             MDX in: docs/quickstart.mdx
           </label>
           <button
-            className="inline-flex h-8 items-center rounded-md px-2 text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-11 items-center rounded-md px-2 text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             data-mdx-reset
             hidden
             suppressHydrationWarning
@@ -36,7 +36,7 @@ export const MdxDemo = () => (
           aria-describedby="mdx-demo-status"
           autoCapitalize="off"
           autoComplete="off"
-          className="min-h-80 w-full flex-1 resize-y bg-transparent p-4 font-mono [font-variant-ligatures:none] text-[13px] leading-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset md:text-sm"
+          className="min-h-80 w-full flex-1 resize-y bg-transparent p-4 font-mono [font-variant-ligatures:none] text-base leading-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset md:text-sm"
           data-mdx-input
           defaultValue={DEMO_SOURCE}
           id="mdx-demo-input"

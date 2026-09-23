@@ -105,7 +105,7 @@ const PrimaryCta = ({
   location: string;
   size?: "default" | "lg";
 }) => (
-  <Button asChild className="rounded-full" size={size}>
+  <Button asChild className="min-h-11 rounded-full" size={size}>
     <a
       data-cta-label={CTA_LABEL}
       data-cta-location={location}
@@ -225,14 +225,14 @@ export default function HomePage() {
         secondary={
           <>
             <Link
-              className={`${textLink} text-sm`}
+              className={`${textLink} inline-flex min-h-11 items-center text-sm`}
               data-cta-location="home_hero_secondary"
               href="/docs"
             >
               Read the docs
             </Link>
             <Link
-              className={`${textLink} text-sm`}
+              className={`${textLink} inline-flex min-h-11 items-center text-sm`}
               data-cta-location="home_hero_migrate"
               href="/docs/guides/migrate-from-mintlify"
             >
@@ -349,7 +349,11 @@ export default function HomePage() {
                 keys or telemetry.
               </p>
               <div className="mt-6">
-                <Button asChild className="rounded-full" variant="outline">
+                <Button
+                  asChild
+                  className="min-h-11 rounded-full"
+                  variant="outline"
+                >
                   <a
                     data-cta-location="home_pricing_self_hosted"
                     href={siteConfig.links.github}
